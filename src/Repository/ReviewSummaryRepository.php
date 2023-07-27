@@ -4,27 +4,27 @@ declare(strict_types=1);
 
 namespace App\Repository;
 
-use App\Entity\Review;
+use App\Entity\ReviewSummary;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends ServiceEntityRepository<Review>
+ * @extends ServiceEntityRepository<ReviewSummary>
  *
- * @method Review|null find($id, $lockMode = null, $lockVersion = null)
- * @method Review|null findOneBy(array $criteria, array $orderBy = null)
- * @method Review[]    findAll()
- * @method Review[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @method ReviewSummary|null find($id, $lockMode = null, $lockVersion = null)
+ * @method ReviewSummary|null findOneBy(array $criteria, array $orderBy = null)
+ * @method ReviewSummary[]    findAll()
+ * @method ReviewSummary[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class ReviewRepository extends ServiceEntityRepository
+class ReviewSummaryRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, Review::class);
+        parent::__construct($registry, ReviewSummary::class);
     }
 
     //    /**
-    //     * @return Review[] Returns an array of Review objects
+    //     * @return ReviewSummary[] Returns an array of ReviewSummary objects
     //     */
     //    public function findByExampleField($value): array
     //    {
@@ -38,7 +38,7 @@ class ReviewRepository extends ServiceEntityRepository
     //        ;
     //    }
 
-    //    public function findOneBySomeField($value): ?Review
+    //    public function findOneBySomeField($value): ?ReviewSummary
     //    {
     //        return $this->createQueryBuilder('r')
     //            ->andWhere('r.exampleField = :val')
