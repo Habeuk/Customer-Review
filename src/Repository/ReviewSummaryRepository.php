@@ -47,4 +47,14 @@ class ReviewSummaryRepository extends ServiceEntityRepository
     //            ->getOneOrNullResult()
     //        ;
     //    }
+
+
+    public function findOneByProduct($product): ?ReviewSummary
+    {
+        return $this->createQueryBuilder('r')
+            ->andWhere('r.product = :val')
+            ->setParameter('val', $product)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
 }

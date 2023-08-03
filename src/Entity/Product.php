@@ -20,11 +20,11 @@ class Product
     #[ORM\Column(length: 255)]
     private ?string $handle = null;
 
-    #[ORM\OneToOne(mappedBy: 'handle', cascade: ['persist', 'remove'])]
-    private ?ReviewSummary $reviewSummary = null;
-
-    #[ORM\OneToMany(mappedBy: 'handle', targetEntity: Review::class)]
+    #[ORM\OneToMany(mappedBy: 'product', targetEntity: Review::class)]
     private Collection $reviews;
+
+    #[ORM\OneToOne(mappedBy: 'product', cascade: ['persist', 'remove'])]
+    private ?ReviewSummary $reviewSummary = null;
 
     public function __construct()
     {
@@ -48,23 +48,6 @@ class Product
         return $this;
     }
 
-    public function getReviewSummary(): ?ReviewSummary
-    {
-        return $this->reviewSummary;
-    }
-
-    public function setReviewSummary(ReviewSummary $reviewSummary): static
-    {
-        // set the owning side of the relation if necessary
-        if ($reviewSummary->getHandle() !== $this) {
-            $reviewSummary->setHandle($this);
-        }
-
-        $this->reviewSummary = $reviewSummary;
-
-        return $this;
-    }
-
     /**
      * @return Collection<int, Review>
      */
@@ -77,7 +60,7 @@ class Product
     {
         if (!$this->reviews->contains($review)) {
             $this->reviews->add($review);
-            $review->setHandle($this);
+            $review->setProduct($this);
         }
 
         return $this;
@@ -87,10 +70,27 @@ class Product
     {
         if ($this->reviews->removeElement($review)) {
             // set the owning side to null (unless already changed)
-            if ($review->getHandle() === $this) {
-                $review->setHandle(null);
+            if ($review->getProduct() === $this) {
+                $review->setProduct(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getReviewSummary(): ?ReviewSummary
+    {
+        return $this->reviewSummary;
+    }
+
+    public function setReviewSummary(ReviewSummary $reviewSummary): static
+    {
+        // set the owning side of the relation if necessary
+        if ($reviewSummary->getProduct() !== $this) {
+            $reviewSummary->setProduct($this);
+        }
+
+        $this->reviewSummary = $reviewSummary;
 
         return $this;
     }

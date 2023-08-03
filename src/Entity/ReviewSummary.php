@@ -4,36 +4,59 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiResource;
 use App\Entity\Product;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Post;
+use ApiPlatform\Metadata\Put;
 use App\Repository\ReviewSummaryRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
+#[ApiResource(
+    description: "The review summary for a specific product",
+    shortName: "summary",
+    operations: [
+        new Get(),
+    ],
+    normalizationContext: [
+        'groups' => ['summary:read'],
+    ]
+)]
 #[ORM\Entity(repositoryClass: ReviewSummaryRepository::class)]
 class ReviewSummary
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['summary:read'])]
     private ?int $id = null;
 
     #[ORM\Column]
-    private ?int $note1 = null;
+    #[Groups(['summary:read'])]
+    private ?int $note1 = 0;
 
     #[ORM\Column]
-    private ?int $note2 = null;
+    #[Groups(['summary:read'])]
+    private ?int $note2 = 0;
 
     #[ORM\Column]
-    private ?int $note3 = null;
+    #[Groups(['summary:read'])]
+    private ?int $note3 = 0;
 
     #[ORM\Column]
-    private ?int $note4 = null;
+    #[Groups(['summary:read'])]
+    private ?int $note4 = 0;
 
     #[ORM\Column]
-    private ?int $note5 = null;
+    #[Groups(['summary:read'])]
+    private ?int $note5 = 0;
 
     #[ORM\OneToOne(inversedBy: 'reviewSummary', cascade: ['persist', 'remove'])]
     #[ORM\JoinColumn(nullable: false)]
-    private ?product $handle = null;
+    private ?Product $product = null;
+
 
     public function getId(): ?int
     {
@@ -100,14 +123,14 @@ class ReviewSummary
         return $this;
     }
 
-    public function getHandle(): ?product
+    public function getProduct(): ?Product
     {
-        return $this->handle;
+        return $this->product;
     }
 
-    public function setHandle(product $handle): static
+    public function setProduct(Product $product): static
     {
-        $this->handle = $handle;
+        $this->product = $product;
 
         return $this;
     }

@@ -47,4 +47,14 @@ class ProductRepository extends ServiceEntityRepository
     //            ->getOneOrNullResult()
     //        ;
     //    }
+
+        public function findOneByHandle($handle): ?Product
+        {
+            return $this->createQueryBuilder('p')
+                ->andWhere('p.handle = :val')
+                ->setParameter('val', $handle)
+                ->getQuery()
+                ->getOneOrNullResult()
+            ;
+        }
 }
