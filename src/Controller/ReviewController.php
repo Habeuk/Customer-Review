@@ -74,9 +74,6 @@ class ReviewController extends AbstractController
     #[Route('/reviews/{id}', name: 'app_review_edit', methods: Request::METHOD_PUT)]
     public function update(Review $currentReview, Request $request, SerializerInterface $serializer, EntityManagerInterface $em, ProductRepository $productRepository): Response
     {
-        $likes = $currentReview->getLikes();$jsonReviews = $serializer->serialize($reviews, 'json', ['groups' => 'review:read']);
-        return new JsonResponse($jsonReviews, Response::HTTP_OK, ['accept' => 'json'], true);
-        $dislikes = $currentReview->getDislikes();
         $updatedReview = $serializer->deserialize($request->getContent(),
         Review::class,
         'json',

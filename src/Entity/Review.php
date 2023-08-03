@@ -6,6 +6,8 @@ namespace App\Entity;
 
 use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
 use ApiPlatform\Doctrine\Orm\Filter\NumericFilter;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Symfony\Component\Validator\Constraints as Assert;
 use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiProperty;
@@ -81,19 +83,24 @@ class Review
     #[ORM\JoinColumn(nullable: false)]
     private ?Product $product = null;
 
-    #[ORM\Column]
+    #[ORM\Column(options: ["default" => 0])]
     #[Groups(['review:read','review:write'])]
     #[Assert\Choice(choices: Review::LIKES, message: 'The lkes must be 0 or 5')]
-    private ?int $likes = null;
+    private ?int $likes;
 
-    #[ORM\Column]
+    #[ORM\Column(options: ["default" => 0])]
     #[Groups(['review:read','review:write'])]
     #[Assert\Choice(choices: Review::LIKES, message: 'The lkes must be 0 or 5')]
-    private ?int $dislikes = null;
+    private ?int $dislikes;
+
+    #[ORM\OneToMany(mappedBy: 'review', targetEntity: Comment::class)]
+    #[Groups(['review:read'])]
+    private Collection $comments;
 
     function __construct()
     {
         $this->createdAt = new DateTimeImmutable();
+        $this->comments = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -186,6 +193,36 @@ class Review
     public function setDislikes(int $dislikes): static
     {
         $this->dislikes = $dislikes;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Comment>
+     */
+    public function getComments(): Collection
+    {
+        return $this->comments;
+    }
+
+    public function addComment(Comment $comment): static
+    {
+        if (!$this->comments->contains($comment)) {
+            $this->comments->add($comment);
+            $comment->setReview($this);
+        }
+
+        return $this;
+    }
+
+    public function removeComment(Comment $comment): static
+    {
+        if ($this->comments->removeElement($comment)) {
+            // set the owning side to null (unless already changed)
+            if ($comment->getReview() === $this) {
+                $comment->setReview(null);
+            }
+        }
 
         return $this;
     }
