@@ -42,7 +42,7 @@ class ReviewController extends AbstractController
             }
             $result["review"] = $reviews;
             $result["summary"] = [
-                "note_1" => 10,
+                "note_1" => 106,
                 "note_2" => 10,
                 "note_3" => 10,
                 "note_4" => 10,
