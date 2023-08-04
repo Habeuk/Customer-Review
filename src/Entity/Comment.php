@@ -18,7 +18,6 @@ class Comment
     private ?int $id = null;
 
     #[ORM\Column(type: Types::TEXT)]
-    #[Groups(['review:read'])]
     private ?string $comment = null;
 
     #[ORM\Column]
