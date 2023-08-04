@@ -36,8 +36,9 @@ class ReviewController extends AbstractController
 
                 foreach ($review->reponse as $reponse ) {
                     $reponse->created_at = strtotime($reponse->created_at);
-                    $reponse->reponse = "";
                 }
+
+                $review->reponse = "";
             }
             $updatedJsonReviews = json_encode($reviews);
             return new JsonResponse($updatedJsonReviews, Response::HTTP_OK, ['accept' => 'json'], true);
