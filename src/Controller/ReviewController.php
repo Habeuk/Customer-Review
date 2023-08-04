@@ -40,7 +40,8 @@ class ReviewController extends AbstractController
 
                 $review->reponse = "";
             }
-            $updatedJsonReviews = json_encode($reviews);
+            $result["review"] = $review;
+            $updatedJsonReviews = json_encode($result);
             return new JsonResponse($updatedJsonReviews, Response::HTTP_OK, ['accept' => 'json'], true);
         }
 
