@@ -90,7 +90,6 @@ class Review
     private ?int $dislikes;
 
     #[ORM\OneToMany(mappedBy: 'review', targetEntity: Comment::class)]
-    #[Groups(['review:read'])]
     private Collection $comments;
 
     function __construct()
@@ -192,7 +191,7 @@ class Review
 
         return $this;
     }
-    #[Groups(['review:read'])]
+    
     /**
      * @return Collection<int, Comment>
      */
