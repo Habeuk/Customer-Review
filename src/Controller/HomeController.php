@@ -8,6 +8,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Shopify\Auth\FileSessionStorage;
 use Shopify\Auth\OAuth;
 use Shopify\Context;
+use Shopify\Utils;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -18,7 +19,7 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class HomeController extends AbstractController
 {
-    #[Route('api/oauth/install', name: 'app_home')]
+    #[Route('api/oauth/install', name: 'app_install')]
     public function index(Request $request): Response
     {
         $hmac = $request->get("hmac");
@@ -26,15 +27,15 @@ class HomeController extends AbstractController
         $key = $this->getParameter('shopify_api_key');
         $secret = $this->getParameter('shopify_api_secret');
         $scope = $this->getParameter('shopify_app_scope');
+        $host = $this->getParameter('host');
 
         $nonce = "hello";
-        $redirectUri = "https://4d65-102-244-45-209.ngrok-free.app" . $this->generateUrl('app_auth_redirect');
+        $redirectUri = 'https://' . $host . $this->generateUrl('app_auth_redirect');
 
         $shopifyRedirect = "https://$shop/admin/oauth/authorize?client_id=$key&scope=$scope&redirect_uri=$redirectUri&state=$nonce&grant_options[]=$scope";
 
         $response = new RedirectResponse($shopifyRedirect,);
         $response->headers->setCookie(Cookie::create($nonce, $nonce, domain: "$shop.myshopify.com"));
-        //dd($response);
 
         return $response;
     }
@@ -78,7 +79,11 @@ class HomeController extends AbstractController
             $em->persist($shop);
             $em->flush();
 
-            return $this->redirect('/');
+            $host = $request->get('host');
+
+            $embeddedUrl = Utils::getEmbeddedAppUrl($host);
+
+            return $this->redirect($embeddedUrl);
         }
 
         return new Response('', Response::HTTP_BAD_REQUEST);
