@@ -6,6 +6,7 @@ use ApiPlatform\Metadata\ApiResource;
 use App\Entity\Review;
 use App\Repository\ProductRepository;
 use App\Repository\ReviewRepository;
+use App\Repository\ReviewSummaryRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -20,7 +21,13 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 class ReviewController extends AbstractController
 {
     #[Route('/reviews', name: 'app_review', methods: Request::METHOD_GET)]
-    public function index(ReviewRepository $reviewRepository, SerializerInterface $serializer, Request $request): Response
+    public function index(
+        ReviewRepository $reviewRepository, 
+        SerializerInterface $serializer, 
+        Request $request,
+        ReviewSummaryRepository $summaryRepository,
+        ProductRepository $productRepository
+    ): Response
     {
         $page = $request->get("page", 1);
         $note = $request->get("note");
@@ -41,13 +48,18 @@ class ReviewController extends AbstractController
                 $review->reponse = "";
             }
             $result["review"] = $reviews;
-            $result["summary"] = [
-                "note_1" => 106,
-                "note_2" => 10,
-                "note_3" => 10,
-                "note_4" => 10,
-                "note_5" => 10,
-            ];
+            $product = $productRepository->findOneByHandle($handle);
+            if ($product) {
+                $summary = $summaryRepository->findOneByProduct($product);
+                $summaryArray = [
+                    'note_1' => $summary->getNote1(),
+                    'note_2' => $summary->getNote2(),
+                    'note_3' => $summary->getNote3(),
+                    'note_4' => $summary->getNote4(),
+                    'note_5' => $summary->getNote5(),
+                ];
+                $result["summary"] = $summaryArray;
+            }
             $updatedJsonReviews = json_encode($result);
             return new JsonResponse($updatedJsonReviews, Response::HTTP_OK, ['accept' => 'json'], true);
         }
