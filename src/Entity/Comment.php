@@ -22,7 +22,6 @@ class Comment
     private ?string $comment = null;
 
     #[ORM\Column]
-    #[Groups(['review:read'])]
     private ?\DateTimeImmutable $createdAt = null;
 
     #[ORM\ManyToOne(inversedBy: 'comments')]
@@ -50,6 +49,12 @@ class Comment
     }
 
     public function getCreatedAt(): ?\DateTimeImmutable
+    {
+        return $this->createdAt;
+    }
+
+    #[Groups(['review:read'])]
+    public function getCreated_at(): ?\DateTimeImmutable
     {
         return $this->createdAt;
     }

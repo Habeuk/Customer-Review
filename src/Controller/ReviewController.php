@@ -25,11 +25,21 @@ class ReviewController extends AbstractController
         $page = $request->get("page", 1);
         $note = $request->get("note");
         $handle = $request->get("handle");
+
         $reviews = $reviewRepository->findReviews($page, $note, $handle);
         if ($reviews) {
-            
             $jsonReviews = $serializer->serialize($reviews, 'json', ['groups' => 'review:read']);
-            return new JsonResponse($jsonReviews, Response::HTTP_OK, ['accept' => 'json'], true);
+            $reviews = json_decode($jsonReviews);
+
+            foreach ($reviews as $review) {
+                $review->created_at = strtotime($review->created_at);
+
+                foreach ($review->reponse as $reponse ) {
+                    $reponse->created_at = strtotime($reponse->created_at);
+                }
+            }
+            $updatedJsonReviews = json_encode($reviews);
+            return new JsonResponse($updatedJsonReviews, Response::HTTP_OK, ['accept' => 'json'], true);
         }
 
         return new JsonResponse(null, Response::HTTP_NOT_FOUND);

@@ -19,10 +19,7 @@ use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
-use App\Repository\ProductRepository;
 use DateTimeImmutable;
-use Doctrine\ORM\EntityManager;
-use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ApiResource(
@@ -63,10 +60,9 @@ class Review
     #[Assert\NotBlank]
     #[Assert\Length(min: 10, minMessage: 'Your description mus have at least 10 chars')]
     #[Groups(['review:read','review:write'])]
-    private ?string $review = null;
+    private ?string $description = null;
 
     #[ORM\Column]
-    #[Groups(['review:read'])]
     private ?\DateTimeImmutable $createdAt;
 
     #[ORM\Column]
@@ -120,14 +116,14 @@ class Review
         return $this;
     }
 
-    public function getReview(): ?string
+    public function getDescription(): ?string
     {
-        return $this->review;
+        return $this->description;
     }
 
-    public function setReview(string $review): static
+    public function setDescription(string $description): static
     {
-        $this->review = $review;
+        $this->description = $description;
 
         return $this;
     }
@@ -196,7 +192,7 @@ class Review
 
         return $this;
     }
-
+    #[Groups(['review:read'])]
     /**
      * @return Collection<int, Comment>
      */
@@ -225,6 +221,22 @@ class Review
         }
 
         return $this;
+    }
+
+    #[Groups(['review:read'])]
+    public function getCreated_at(): int
+    {
+        $timestamp = $this->createdAt->getTimestamp();
+        return $timestamp;
+    }
+
+    /**
+     * @return Collection<int, Comment>
+     */
+    #[Groups(['review:read'])]
+    public function getReponse(): Collection
+    {
+        return $this->comments;
     }
 
 }
