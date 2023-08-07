@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Repository;
 
 use App\Entity\Review;
+use App\Entity\Shop;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\Persistence\ManagerRegistry;
@@ -49,13 +50,15 @@ class ReviewRepository extends ServiceEntityRepository
     //        ;
     //    }
 
-    public function findReviews(int $page = 1, $note = null, $handle = null)
+    public function findReviews(int $page = 1, $note = null, $handle = null, Shop $shop)
     {
         $pageSize = 10;
         $firstResult = ($page - 1) * $pageSize;
 
         $q = $this->createQueryBuilder('r')
             ->leftJoin('r.product','p')
+            ->andWhere('p.shop = :shop')
+            ->setParameter('shop', $shop)
             ->orderBy('r.id', 'DESC')
             ->setFirstResult($firstResult)
             ->setMaxResults($pageSize);

@@ -48,7 +48,7 @@ class ReviewManager
         );
     }
 
-    public function getProduct($handle, $shopName): ?Product
+    public function getProduct(string $handle, string $shopName): ?Product
     {
         $shop = $this->shopRepository->findOneBy(['name' => $shopName]);
         if ($shop) {
@@ -79,9 +79,9 @@ class ReviewManager
         return null;
     }
 
-    public function getReviews($page, $note, $handle)
+    public function getReviews($page, $note, $handle, $shop)
     {
-        $reviews = $this->reviewRepository->findReviews($page, $note, $handle);
+        $reviews = $this->reviewRepository->findReviews($page, $note, $handle, $shop);
         if ($reviews) {
             $jsonReviews = $this->serializer->serialize($reviews, 'json', ['groups' => 'review:read']);
             $reviews = json_decode($jsonReviews);

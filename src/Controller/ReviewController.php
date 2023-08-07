@@ -48,14 +48,12 @@ class ReviewController extends AbstractController
         if ($_SERVER["APP_ENV"] == "dev") {
             $shop = "madok-co.myshopify.com";
         } else if ($_SERVER["APP_ENV"] = "prod") {
-            $shop = $_SERVER["HTTP_REFERER"];
+            $shop = parse_url($_SERVER["HTTP_REFERER"], PHP_URL_HOST);
         }
-
-        dd($shop);
 
         $product = $reviewManager->getProduct($handle, $shop);
         if ($product) {
-            $jsonReviews = $reviewManager->getReviews($page, $note, $handle);
+            $jsonReviews = $reviewManager->getReviews($page, $note, $handle, $product->getShop());
             if ($jsonReviews) {
                 return new JsonResponse($jsonReviews, Response::HTTP_OK, ['accept' => 'json'], true);
             }
