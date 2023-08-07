@@ -7,6 +7,8 @@ use App\Entity\Review;
 use App\Repository\ProductRepository;
 use App\Repository\ReviewRepository;
 use App\Repository\ReviewSummaryRepository;
+use App\Repository\ShopRepository;
+use App\Service\ReviewManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -22,46 +24,41 @@ class ReviewController extends AbstractController
 {
     #[Route('/reviews', name: 'app_review', methods: Request::METHOD_GET)]
     public function index(
-        ReviewRepository $reviewRepository, 
-        SerializerInterface $serializer, 
+        ReviewRepository $reviewRepository,
+        SerializerInterface $serializer,
         Request $request,
         ReviewSummaryRepository $summaryRepository,
-        ProductRepository $productRepository
-    ): Response
-    {
+        ProductRepository $productRepository,
+        ShopRepository $shopRepository,
+        EntityManagerInterface $em
+    ): Response {
         $page = $request->get("page", 1);
         $note = $request->get("note");
         $handle = $request->get("handle");
 
-        $reviews = $reviewRepository->findReviews($page, $note, $handle);
-        if ($reviews) {
-            $jsonReviews = $serializer->serialize($reviews, 'json', ['groups' => 'review:read']);
-            $reviews = json_decode($jsonReviews);
+        $reviewManager = new ReviewManager(
+            $shopRepository,
+            $em,
+            $productRepository,
+            $serializer,
+            $summaryRepository,
+            $reviewRepository
+        );
 
-            foreach ($reviews as $review) {
-                $review->created_at = strtotime($review->created_at);
+        if ($_SERVER["APP_ENV"] == "dev") {
+            $shop = "madok-co.myshopify.com";
+        } else if ($_SERVER["APP_ENV"] = "prod") {
+            $shop = $_SERVER["HTTP_REFERER"];
+        }
 
-                foreach ($review->reponse as $reponse ) {
-                    $reponse->created_at = strtotime($reponse->created_at);
-                }
+        dd($shop);
 
-                $review->reponse = "";
+        $product = $reviewManager->getProduct($handle, $shop);
+        if ($product) {
+            $jsonReviews = $reviewManager->getReviews($page, $note, $handle);
+            if ($jsonReviews) {
+                return new JsonResponse($jsonReviews, Response::HTTP_OK, ['accept' => 'json'], true);
             }
-            $result["review"] = $reviews;
-            $product = $productRepository->findOneByHandle($handle);
-            if ($product) {
-                $summary = $summaryRepository->findOneByProduct($product);
-                $summaryArray = [
-                    'note_1' => $summary->getNote1(),
-                    'note_2' => $summary->getNote2(),
-                    'note_3' => $summary->getNote3(),
-                    'note_4' => $summary->getNote4(),
-                    'note_5' => $summary->getNote5(),
-                ];
-                $result["summary"] = $summaryArray;
-            }
-            $updatedJsonReviews = json_encode($result);
-            return new JsonResponse($updatedJsonReviews, Response::HTTP_OK, ['accept' => 'json'], true);
         }
 
         return new JsonResponse(null, Response::HTTP_NOT_FOUND);
@@ -74,8 +71,8 @@ class ReviewController extends AbstractController
         $data = $request->request->all();
 
         $review->setTitle($data["title"]);
-        $review->setReview($data["review"]);
-        $review->setNote( (int) $data["note"]);
+        $review->setDescription($data["description"]);
+        $review->setNote((int) $data["note"]);
         $review->setLikes(0);
         $review->setDislikes(0);
 
@@ -106,10 +103,12 @@ class ReviewController extends AbstractController
     #[Route('/reviews/{id}', name: 'app_review_edit', methods: Request::METHOD_PUT)]
     public function update(Review $currentReview, Request $request, SerializerInterface $serializer, EntityManagerInterface $em, ProductRepository $productRepository): Response
     {
-        $updatedReview = $serializer->deserialize($request->getContent(),
-        Review::class,
-        'json',
-        [AbstractNormalizer::OBJECT_TO_POPULATE => $currentReview]);
+        $updatedReview = $serializer->deserialize(
+            $request->getContent(),
+            Review::class,
+            'json',
+            [AbstractNormalizer::OBJECT_TO_POPULATE => $currentReview]
+        );
         $em->persist($updatedReview);
         $em->flush();
         return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
@@ -119,7 +118,7 @@ class ReviewController extends AbstractController
     public function get(Review $review, SerializerInterface $serializer): JsonResponse
     {
         if ($review) {
-            
+
             $jsonReviews = $serializer->serialize($review, 'json', ['groups' => 'review:read']);
             return new JsonResponse($jsonReviews, Response::HTTP_OK, ['accept' => 'json'], true);
         }

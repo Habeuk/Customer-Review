@@ -1,8 +1,8 @@
 App\Entity\Review:
-    review{1..100}:
+    review{1..150}:
         title: '<title()>'
-        review: '<realText(80, 2)>'
+        description: '<realText(80, 2)>'
         note: '<numberBetween(1, 5)>'
-        product: '@product<numberBetween(1, 10)>'
+        product: '@product<numberBetween(1, 30)>'
         likes: '<numberBetween(0, 100)>'
         dislikes: '<numberBetween(0, 100)>'

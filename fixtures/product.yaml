@@ -1,3 +1,5 @@
 App\Entity\Product:
-    product{1..10}:
+    product{1..30}:
+        title: '<title()>'
         handle (unique): '<slug()>'
+        shop: '@shop<numberBetween(1, 5)>'

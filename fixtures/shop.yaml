@@ -1,0 +1,4 @@
+App\Entity\Shop:
+  shop{1..5}:
+    name: '<domainWord()>.myshopify.com'
+    token: '<slug()>'
