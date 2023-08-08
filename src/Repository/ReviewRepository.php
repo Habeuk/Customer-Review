@@ -50,7 +50,7 @@ class ReviewRepository extends ServiceEntityRepository
     //        ;
     //    }
 
-    public function findReviews(int $page = 1, $note = null, $handle = null, Shop $shop)
+    public function findReviews(Shop $shop, int $page = 1, $note = null, $handle = null)
     {
         $pageSize = 10;
         $firstResult = ($page - 1) * $pageSize;
@@ -89,4 +89,15 @@ class ReviewRepository extends ServiceEntityRepository
             ->getQuery()
             ->getOneOrNullResult();
     }
+
+    public function countReviewsByProduct($product)
+    {
+        return $this->createQueryBuilder('r')
+            ->select('count(r.id) as count')
+            ->andWhere('r.product = :product')
+            ->setParameter('product', $product)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
 }

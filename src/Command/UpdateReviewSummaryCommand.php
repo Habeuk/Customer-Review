@@ -39,6 +39,11 @@ class UpdateReviewSummaryCommand extends Command
                 $setNote = "setNote" . $i;
                 $count = $reviewRepository->countReviewByNoteAndProduct($i, $summary->getProduct());
                 $summary->$setNote($count["count"]);
+                $total = $reviewRepository->countReviewsByProduct($summary->getProduct());
+
+
+                $summary->setTotal($total["count"]);
+                $summary->setMean($this->getMean($total["count"], $summary));
                 $this->em->flush();
             }
         }
@@ -46,12 +51,24 @@ class UpdateReviewSummaryCommand extends Command
         return Command::SUCCESS;
     }
 
+    public function getMean(int $total, ReviewSummary $summary)
+    {
+        $note = 0;
+        $note += $summary->getNote1() * 1;
+        $note += $summary->getNote2() * 2;
+        $note += $summary->getNote3() * 3;
+        $note += $summary->getNote4() * 4;
+        $note += $summary->getNote5() * 5;
+
+        $mean = $note / $total;
+
+        return $mean * 100 / 5;
+    }
+
     protected function configure(): void
     {
         $this
             // the command help shown when running the command with the "--help" option
-            ->setHelp('This command allows you to update the summaries of the products')
-        ;
+            ->setHelp('This command allows you to update the summaries of the products');
     }
 }
-
