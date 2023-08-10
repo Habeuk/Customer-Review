@@ -15,7 +15,6 @@ use Symfony\Component\Console\Output\OutputInterface;
     name: 'app:update-review-summary',
     description: 'Update the summaries of the products',
     hidden: false,
-    aliases: ['app:add-user']
 )]
 class UpdateReviewSummaryCommand extends Command
 {
