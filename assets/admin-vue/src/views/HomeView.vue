@@ -23,25 +23,18 @@
         </div>
       </div>
       <div class="card bg-white">
-
         <ul class="nav nav-underline p-3">
           <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="#">All Reviews</a>
+            <a class="nav-link active" @click="getReviews($event)" aria-current="page" href="#">All Reviews</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link link-secondary" href="#">Unpublished</a>
+            <a class="nav-link link-secondary" @click="getUnpublishedReviews($event)" href="#">Unpublished</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link link-secondary" href="#">Published</a>
+            <a class="nav-link link-secondary" @click="getPublishedReviews($event)" href="#">Published</a>
           </li>
-          <li class="nav-item">
-            <a class="nav-link link-secondary">Flagged</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link link-secondary">Spam</a>
-          </li>
-        </ul>
-        <DataTable :value="products" tableStyle="min-width: 50rem" :loading="loading">
+        </ul><span>Delete</span>
+        <DataTable :value="reviews" tableStyle="min-width: 50rem" :loading="loading">
           <template #header>
             <div class="flex justify-content-end">
               <div class="p-input-icon-left">
@@ -56,10 +49,10 @@
               <Rating :modelValue="slotProps.data.note" readonly :cancel="false" />
             </template>
           </Column>
-          <Column field="review" header="Review">
+          <Column field="description" header="Review">
             <template #body="slotProps">
               <h6 class=".fs-6 text-primary">{{ slotProps.data.title }}</h6>
-              <p>{{ slotProps.data.review }}</p>
+              <p>{{ slotProps.data.description }}</p>
               <p>- {{ slotProps.data.name }}</p>
             </template>
           </Column>
@@ -68,7 +61,19 @@
               {{ formatDate(slotProps.data.createdAt) }}
             </template>
           </Column>
-          <Column field="is_published" header="Status"></Column>
+          <Column  field="is_published" header="Status">
+            <template #body="slotProps">
+              <div class="d-flex">
+                <InputSwitch v-model="slotProps.data.isValidated" />
+              </div>
+            </template>
+          </Column>
+          <Column field="actions" header="Actions">
+          <template #body="slotProps">
+            <Button icon="pi pi-check" text raised rounded aria-label="Filter" />
+            <Button icon="pi pi-check" text raised rounded aria-label="Filter" />
+          </template>
+          </Column>
         </DataTable>
       </div>
     </div>
@@ -82,6 +87,10 @@ import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Rating from 'primevue/rating';
 import InputText from 'primevue/inputtext';
+import Tag from 'primevue/tag';
+import Toolbar from 'primevue/toolbar';
+import Button from 'primevue/button';
+import InputSwitch from 'primevue/inputswitch';
 import axios from 'axios';
 
 
@@ -89,7 +98,7 @@ onMounted(() => {
   getReviews();
 });
 
-const products = ref();
+const reviews = ref();
 const loading = ref(true);
 
 const filters = ref({
@@ -101,10 +110,17 @@ const filters = ref({
   verified: { value: null, matchMode: FilterMatchMode.EQUALS }
 });
 
-function getReviews() {
-  axios.get('https://localhost:8000/reviews').then(res => {
-    products.value = res.data
+function getReviews(event) {
+  if (event) {
+    event.preventDefault();
+  }
+  loading.value = true;
+  axios.get('https://127.0.0.1:8000/shopify/admin/reviews').then(res => {
+    reviews.value = res.data
     loading.value = false;
+    if (event) {
+      updateActive(event);
+    }
   });
 }
 
@@ -115,5 +131,45 @@ function formatDate(stringDate) {
   const formattedDate = `${month} ${day}`;
   stringDate = formattedDate;
   return stringDate;
+}
+
+function getUnpublishedReviews(event) {
+  if (event) {
+    event.preventDefault();
+  }
+  loading.value = true;
+  axios.get('https://127.0.0.1:8000/shopify/admin/reviews?unpublished=1').then(res => {
+    reviews.value = res.data
+    loading.value = false;
+    if (event) {
+      updateActive(event);
+    }
+  });
+
+}
+
+function getPublishedReviews(event) {
+  if (event) {
+    event.preventDefault();
+  }
+  loading.value = true;
+  axios.get('https://127.0.0.1:8000/shopify/admin/reviews?published=1').then(res => {
+    reviews.value = res.data
+    loading.value = false;
+    if (event) {
+      updateActive(event);
+    }
+  });
+
+}
+
+function updateActive(event) {
+  let oldElement = document.querySelector(".nav-link.active");
+  oldElement.removeAttribute('aria-current');
+  oldElement.classList.remove("active");
+  oldElement.classList.add("link-secondary");
+  event.target.classList.add("active");
+  event.target.classList.remove("link-secondary");
+  event.target.setAttribute("aria-current", "page");
 }
 </script>

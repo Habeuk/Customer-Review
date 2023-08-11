@@ -77,7 +77,7 @@ class ReviewRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    public function findReviewsByShop(int $page = 1, $shop)
+    public function findReviewsByShop(int $page = 1, $shop, $isUnpublished, $isPublished)
     {
         $pageSize = 10;
         $firstResult = ($page - 1) * $pageSize;
@@ -89,6 +89,16 @@ class ReviewRepository extends ServiceEntityRepository
             ->setParameter('shop', $shop)
             ->setFirstResult($firstResult)
             ->setMaxResults($pageSize);
+
+        if ($isUnpublished) {
+            $q->andWhere('r.isValidated = :val')
+            ->setParameter('val', false);
+        }
+
+        if ($isPublished) {
+            $q->andWhere('r.isValidated = :val')
+            ->setParameter('val', true);
+        }
 
         return $q->getQuery()
             ->getResult();
