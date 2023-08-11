@@ -48,11 +48,13 @@ class ProductRepository extends ServiceEntityRepository
     //        ;
     //    }
 
-        public function findOneByHandle($handle): ?Product
+        public function findOneByShopAndHandle($handle, $shop): ?Product
         {
             return $this->createQueryBuilder('p')
-                ->andWhere('p.handle = :val')
-                ->setParameter('val', $handle)
+                ->andWhere('p.handle = :handle')
+                ->andWhere('p.shop = :shop')
+                ->setParameter('handle', $handle)
+                ->setParameter('shop', $shop)
                 ->getQuery()
                 ->getOneOrNullResult()
             ;

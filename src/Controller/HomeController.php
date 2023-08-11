@@ -16,6 +16,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
+use Shopify\Auth\OAuthCookie;
 
 class HomeController extends AbstractController
 {
@@ -33,6 +34,8 @@ class HomeController extends AbstractController
         $redirectUri = 'https://' . $host . $this->generateUrl('app_auth_redirect');
 
         $shopifyRedirect = "https://$shop/admin/oauth/authorize?client_id=$key&scope=$scope&redirect_uri=$redirectUri&state=$nonce&grant_options[]=$scope";
+
+
 
         $response = new RedirectResponse($shopifyRedirect,);
         $response->headers->setCookie(Cookie::create($nonce, $nonce, domain: "$shop.myshopify.com"));
