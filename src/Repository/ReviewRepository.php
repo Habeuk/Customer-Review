@@ -74,6 +74,23 @@ class ReviewRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    public function findReviewsByShop(int $page = 1, $shop)
+    {
+        $pageSize = 10;
+        $firstResult = ($page - 1) * $pageSize;
+
+        $q = $this->createQueryBuilder('r')
+            ->leftJoin('r.product','p')
+            ->orderBy('r.id', 'DESC')
+            ->andWhere('p.shop = :shop')
+            ->setParameter('shop', $shop)
+            ->setFirstResult($firstResult)
+            ->setMaxResults($pageSize);
+
+        return $q->getQuery()
+            ->getResult();
+    }
+
 
     public function countReviewByNoteAndProduct($note, $product)
     {
