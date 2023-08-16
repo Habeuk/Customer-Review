@@ -1,3 +1,6 @@
 App\Entity\Product:
-    product{1..10}:
+    product{1..30}:
+        title: '<sentence(3)>'
+        imageSrc: '//3fuoxcekbdmy6e44-73694380331.shopifypreview.com/cdn/shop/products/Main_b9e0da7f-db89-4d41-83f0-7f417b02831d.jpg?v=1678788874'
         handle (unique): '<slug()>'
+        shop: '@shop<numberBetween(1, 5)>'

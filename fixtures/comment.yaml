@@ -1,4 +1,4 @@
 App\Entity\Comment:
     comment{1..50}:
-        review: '@review<numberBetween(1, 100)>'
+        review: '@review<numberBetween(1, 150)>'
         comment: '<realText(80, 2)>'

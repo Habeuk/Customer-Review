@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Repository;
 
 use App\Entity\Review;
+use App\Entity\Shop;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\Persistence\ManagerRegistry;
@@ -49,13 +50,15 @@ class ReviewRepository extends ServiceEntityRepository
     //        ;
     //    }
 
-    public function findReviews(int $page = 1, $note = null, $handle = null)
+    public function findReviews(Shop $shop, int $page = 1, $note = null, $handle = null)
     {
         $pageSize = 10;
         $firstResult = ($page - 1) * $pageSize;
 
         $q = $this->createQueryBuilder('r')
             ->leftJoin('r.product','p')
+            ->andWhere('p.shop = :shop')
+            ->setParameter('shop', $shop)
             ->orderBy('r.id', 'DESC')
             ->setFirstResult($firstResult)
             ->setMaxResults($pageSize);
@@ -74,6 +77,33 @@ class ReviewRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    public function findReviewsByShop(int $page = 1, $shop, $isUnpublished, $isPublished)
+    {
+        $pageSize = 10;
+        $firstResult = ($page - 1) * $pageSize;
+
+        $q = $this->createQueryBuilder('r')
+            ->leftJoin('r.product','p')
+            ->orderBy('r.id', 'DESC')
+            ->andWhere('p.shop = :shop')
+            ->setParameter('shop', $shop)
+            ->setFirstResult($firstResult)
+            ->setMaxResults($pageSize);
+
+        if ($isUnpublished) {
+            $q->andWhere('r.isValidated = :val')
+            ->setParameter('val', false);
+        }
+
+        if ($isPublished) {
+            $q->andWhere('r.isValidated = :val')
+            ->setParameter('val', true);
+        }
+
+        return $q->getQuery()
+            ->getResult();
+    }
+
 
     public function countReviewByNoteAndProduct($note, $product)
     {
@@ -86,4 +116,15 @@ class ReviewRepository extends ServiceEntityRepository
             ->getQuery()
             ->getOneOrNullResult();
     }
+
+    public function countReviewsByProduct($product)
+    {
+        return $this->createQueryBuilder('r')
+            ->select('count(r.id) as count')
+            ->andWhere('r.product = :product')
+            ->setParameter('product', $product)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
 }

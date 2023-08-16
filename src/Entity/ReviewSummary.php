@@ -57,6 +57,14 @@ class ReviewSummary
     #[ORM\JoinColumn(nullable: false)]
     private ?Product $product = null;
 
+    #[ORM\Column(nullable: true)]
+    #[Groups(['shop:review:read'])]
+    private ?int $total = null;
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(['shop:review:read'])]
+    private ?int $mean = null;
+
 
     public function getId(): ?int
     {
@@ -131,6 +139,30 @@ class ReviewSummary
     public function setProduct(Product $product): static
     {
         $this->product = $product;
+
+        return $this;
+    }
+
+    public function getTotal(): ?int
+    {
+        return $this->total;
+    }
+
+    public function setTotal(?int $total): static
+    {
+        $this->total = $total;
+
+        return $this;
+    }
+
+    public function getMean(): ?int
+    {
+        return $this->mean;
+    }
+
+    public function setMean(?int $mean): static
+    {
+        $this->mean = $mean;
 
         return $this;
     }

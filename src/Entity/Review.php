@@ -19,10 +19,7 @@ use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
-use App\Repository\ProductRepository;
 use DateTimeImmutable;
-use Doctrine\ORM\EntityManager;
-use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ApiResource(
@@ -34,7 +31,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
         new Put(),
     ],
     normalizationContext: [
-        'groups' => ['review:read'],
+        'groups' => ['review:read', 'shop:review:read'],
     ],
     denormalizationContext: [
         'groups' => ['review:write'],
@@ -51,34 +48,35 @@ class Review
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['review:read'])]
+    #[Groups(['review:read', 'shop:review:read'])]
     #[ApiProperty(identifier: false)]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['review:read', 'review:write'])]
+    #[Groups(['review:read', 'review:write', 'shop:review:read'])]
     private ?string $title = null;
 
     #[ORM\Column(type: Types::TEXT)]
     #[Assert\NotBlank]
     #[Assert\Length(min: 10, minMessage: 'Your description mus have at least 10 chars')]
-    #[Groups(['review:read','review:write'])]
-    private ?string $review = null;
+    #[Groups(['review:read','review:write', 'shop:review:read'])]
+    private ?string $description = null;
 
     #[ORM\Column]
-    #[Groups(['review:read'])]
+    #[Groups(['review:read', 'shop:review:read'])]
     private ?\DateTimeImmutable $createdAt;
 
     #[ORM\Column]
+    #[Groups(['shop:review:read','review:write'])]
     private ?bool $isValidated = false;
 
     #[ORM\Column]
-    #[Groups(['review:read','review:write'])]
+    #[Groups(['review:read','review:write', 'shop:review:read'])]
     #[Assert\NotBlank]
     #[Assert\Choice(choices: Review::NOTES, message: 'The note must be a number between 1 and 5')]
     #[ApiFilter(NumericFilter::class)]
     private ?int $note = null;
-
+    
     #[ORM\ManyToOne(inversedBy: 'reviews')]
     #[ORM\JoinColumn(nullable: false)]
     private ?Product $product = null;
@@ -94,8 +92,15 @@ class Review
     private ?int $dislikes;
 
     #[ORM\OneToMany(mappedBy: 'review', targetEntity: Comment::class)]
-    #[Groups(['review:read'])]
     private Collection $comments;
+
+    #[ORM\Column(length: 255)]
+    #[Groups(['review:read','review:write', 'shop:review:read'])]
+    private ?string $name = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['shop:review:read'])]
+    private ?string $email = null;
 
     function __construct()
     {
@@ -120,14 +125,14 @@ class Review
         return $this;
     }
 
-    public function getReview(): ?string
+    public function getDescription(): ?string
     {
-        return $this->review;
+        return $this->description;
     }
 
-    public function setReview(string $review): static
+    public function setDescription(string $description): static
     {
-        $this->review = $review;
+        $this->description = $description;
 
         return $this;
     }
@@ -196,7 +201,7 @@ class Review
 
         return $this;
     }
-
+    
     /**
      * @return Collection<int, Comment>
      */
@@ -223,6 +228,46 @@ class Review
                 $comment->setReview(null);
             }
         }
+
+        return $this;
+    }
+
+    #[Groups(['review:read'])]
+    public function getCreated_at(): int
+    {
+        $timestamp = $this->createdAt->getTimestamp();
+        return $timestamp;
+    }
+
+    /**
+     * @return Collection<int, Comment>
+     */
+    #[Groups(['review:read'])]
+    public function getReponse(): Collection
+    {
+        return $this->comments;
+    }
+
+    public function getName(): ?string
+    {
+        return $this->name;
+    }
+
+    public function setName(string $name): static
+    {
+        $this->name = $name;
+
+        return $this;
+    }
+
+    public function getEmail(): ?string
+    {
+        return $this->email;
+    }
+
+    public function setEmail(?string $email): static
+    {
+        $this->email = $email;
 
         return $this;
     }
