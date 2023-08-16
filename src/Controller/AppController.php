@@ -20,7 +20,7 @@ class AppController extends AbstractController
             } else {
                 return file_get_contents(base_path('frontend/index.html'));
             } */
-            return new Response("hello");
+            return $this->redirect($this->generateUrl("app_admin"));
         } else {
             $params = $request->query->all();
             return $this->redirect($this->generateUrl("app_install"). "?" . http_build_query($params));

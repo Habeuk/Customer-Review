@@ -151,6 +151,7 @@ import { useConfirm } from "primevue/useconfirm";
 import { useToast } from "primevue/usetoast";
 import { useField, useForm } from 'vee-validate';
 import axios from 'axios';
+import { HTTP } from '../http-common';
 
 
 onMounted(() => {
@@ -181,7 +182,7 @@ function getReviews(event) {
     event.preventDefault();
   }
   loading.value = true;
-  axios.get('https://127.0.0.1:8000/shopify/admin/reviews').then(res => {
+  HTTP.get('/shopify/admin/reviews').then(res => {
     reviews.value = res.data
     loading.value = false;
     if (event) {
@@ -204,7 +205,7 @@ function getUnpublishedReviews(event) {
     event.preventDefault();
   }
   loading.value = true;
-  axios.get('https://127.0.0.1:8000/shopify/admin/reviews?unpublished=1').then(res => {
+  axios.get('/shopify/admin/reviews?unpublished=1').then(res => {
     reviews.value = res.data
     loading.value = false;
     if (event) {
@@ -219,7 +220,7 @@ function getPublishedReviews(event) {
     event.preventDefault();
   }
   loading.value = true;
-  axios.get('https://127.0.0.1:8000/shopify/admin/reviews?published=1').then(res => {
+  axios.get('/shopify/admin/reviews?published=1').then(res => {
     reviews.value = res.data
     loading.value = false;
     if (event) {
@@ -248,7 +249,7 @@ const validate = (slotProps, value) => {
     header: 'Confirmation',
     icon: 'pi pi-exclamation-triangle',
     accept: () => {
-      axios.put('https://127.0.0.1:8000/reviews/' + slotProps.data.id, {
+      axios.put( '/reviews/' + slotProps.data.id, {
         isValidated: value
       }).then(() => {
         reviews.value[slotProps.index].isValidated = value;
@@ -264,9 +265,9 @@ const validate = (slotProps, value) => {
 };
 
 function reply(id) {
-  axios.get('https://127.0.0.1:8000/shopify/admin/reviews/' + id).then(res => {
+  axios.get('/shopify/admin/reviews/' + id).then(res => {
     review.value = res.data;
-    axios.get('https://127.0.0.1:8000/shopify/admin/product/' + id).then(res => {
+    axios.get('/shopify/admin/product/' + id).then(res => {
       product.value = res.data;
       visible.value = true;
     })
@@ -286,7 +287,7 @@ const onSubmit = handleSubmit((values) => {
   if (values.value && values.value.length > 0) {
     console.log(values)
     axios.post(
-      'https://127.0.0.1:8000/comments/' + review.value.id,
+      '/comments/' + review.value.id,
       {
         comment: values.value
       }
