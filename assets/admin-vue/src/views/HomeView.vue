@@ -188,6 +188,8 @@ function getReviews(event) {
     if (event) {
       updateActive(event);
     }
+  }).catch(function (error) {
+    loading.value = false;
   });
 }
 
