@@ -43,10 +43,7 @@ class ShopifyAdminController extends AbstractController
                 return new JsonResponse($jsonReviews, Response::HTTP_OK, ['accept' => 'json'], true);
             }
         }
-        dd($reviews);
-        return $this->render('shopify_admin/index.html.twig', [
-            'controller_name' => 'ShopifyAdminController',
-        ]);
+        return new JsonResponse(null, Response::HTTP_NOT_FOUND);
     }
 
     #[Route('/reviews/{id}', name: 'app_shop_review_get', methods: Request::METHOD_GET)]
