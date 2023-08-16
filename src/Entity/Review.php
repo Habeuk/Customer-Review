@@ -67,7 +67,7 @@ class Review
     private ?\DateTimeImmutable $createdAt;
 
     #[ORM\Column]
-    #[Groups(['shop:review:read'])]
+    #[Groups(['shop:review:read','review:write'])]
     private ?bool $isValidated = false;
 
     #[ORM\Column]
@@ -76,7 +76,7 @@ class Review
     #[Assert\Choice(choices: Review::NOTES, message: 'The note must be a number between 1 and 5')]
     #[ApiFilter(NumericFilter::class)]
     private ?int $note = null;
-
+    
     #[ORM\ManyToOne(inversedBy: 'reviews')]
     #[ORM\JoinColumn(nullable: false)]
     private ?Product $product = null;
@@ -97,6 +97,10 @@ class Review
     #[ORM\Column(length: 255)]
     #[Groups(['review:read','review:write', 'shop:review:read'])]
     private ?string $name = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['shop:review:read'])]
+    private ?string $email = null;
 
     function __construct()
     {
@@ -252,6 +256,18 @@ class Review
     public function setName(string $name): static
     {
         $this->name = $name;
+
+        return $this;
+    }
+
+    public function getEmail(): ?string
+    {
+        return $this->email;
+    }
+
+    public function setEmail(?string $email): static
+    {
+        $this->email = $email;
 
         return $this;
     }

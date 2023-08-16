@@ -2,6 +2,8 @@
 
 namespace App\Controller;
 
+use App\Entity\Product;
+use App\Entity\Review;
 use App\Repository\ReviewRepository;
 use App\Repository\ShopRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -45,5 +47,30 @@ class ShopifyAdminController extends AbstractController
         return $this->render('shopify_admin/index.html.twig', [
             'controller_name' => 'ShopifyAdminController',
         ]);
+    }
+
+    #[Route('/reviews/{id}', name: 'app_shop_review_get', methods: Request::METHOD_GET)]
+    public function get(Review $review, SerializerInterface $serializer): JsonResponse
+    {
+        if ($review) {
+
+            $jsonReviews = $serializer->serialize($review, 'json', ['groups' => 'shop:review:read']);
+            return new JsonResponse($jsonReviews, Response::HTTP_OK, ['accept' => 'json'], true);
+        }
+
+        return new JsonResponse(null, Response::HTTP_NOT_FOUND);
+    }
+
+    #[Route('/product/{id}', name: 'app_shop_product_get', methods: Request::METHOD_GET)]
+    public function getProduct(Review $review, SerializerInterface $serializer): JsonResponse
+    {
+        if ($review) {
+            $product = $review->getProduct();
+
+            $jsonProduct = $serializer->serialize($product, 'json', ['groups' => 'shop:review:read']);
+            return new JsonResponse($jsonProduct, Response::HTTP_OK, ['accept' => 'json'], true);
+        }
+
+        return new JsonResponse(null, Response::HTTP_NOT_FOUND);
     }
 }

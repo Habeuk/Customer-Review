@@ -1,4 +1,6 @@
 <template>
+  <Toast />
+  <ConfirmDialog />
   <main>
     <div class="container-fluid bg-light">
       <div class="row">
@@ -33,7 +35,7 @@
           <li class="nav-item">
             <a class="nav-link link-secondary" @click="getPublishedReviews($event)" href="#">Published</a>
           </li>
-        </ul><span>Delete</span>
+        </ul>
         <DataTable :value="reviews" tableStyle="min-width: 50rem" :loading="loading">
           <template #header>
             <div class="flex justify-content-end">
@@ -61,23 +63,74 @@
               {{ formatDate(slotProps.data.createdAt) }}
             </template>
           </Column>
-          <Column  field="is_published" header="Status">
+          <Column field="is_published" header="Status">
             <template #body="slotProps">
               <div class="d-flex">
-                <InputSwitch v-model="slotProps.data.isValidated" />
+                <InputSwitch :model-value="slotProps.data.isValidated"
+                  @click="validate(slotProps, !slotProps.data.isValidated)" />
               </div>
             </template>
           </Column>
           <Column field="actions" header="Actions">
-          <template #body="slotProps">
-            <Button icon="pi pi-check" text raised rounded aria-label="Filter" />
-            <Button icon="pi pi-check" text raised rounded aria-label="Filter" />
-          </template>
+            <template #body="slotProps">
+              <Button icon="pi pi-reply" v-tooltip="'Reply'" text raised rounded aria-label="Filter"
+                @click="reply(slotProps.data.id)" />
+            </template>
           </Column>
         </DataTable>
       </div>
     </div>
   </main>
+
+  <Dialog v-model:visible="visible" header="Reply to review" :style="{ width: '75vw' }" modal="true">
+    <div class="row">
+      <div class="col-md-9">
+        <div class="card mb-3">
+          <div class="card-body">
+            <div class="d-flex justify-content-between mb-4">
+              <Rating :modelValue="review.note" readonly :cancel="false" />
+              <Tag v-if="review.isValidated" severity="success" value="Published"></Tag>
+              <Tag v-else severity="warning" value="Unpublished"></Tag>
+            </div>
+            <h5 class="card-title mb-4">{{ review.title }}</h5>
+            <p class="card-text">{{ review.description }}</p>
+          </div>
+          <div class="card-footer bg-white">
+            {{ review.name }} ( <a href="mailto:{{ review.email }}">{{ review.email }}</a> )
+          </div>
+        </div>
+        <div class="card">
+          <form @submit="onSubmit" class="form">
+            <div class="card-body">
+              <h5 class="card-title mb-4">Reply to review</h5>
+              <span class="p-float-label">
+                <Textarea id="value" auto-resize="true" v-model="value" :rows="4" :class="{ 'p-invalid': errorMessage }"
+                  :style="{ width: 100 + '%' }" aria-describedby="text-error" />
+                <label for="value">Add a reply to this review...</label>
+              </span>
+              <small id="text-error" class="p-error">{{ errorMessage || '&nbsp;' }}</small>
+            </div>
+            <div class="card-footer bg-white d-flex justify-content-end mt-2 pt-4">
+              <Button label="Post reply" :type="'submit'" severity="help" />
+            </div>
+          </form>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">Product details</h5>
+            <img :src="product.imageSrc + '&width=80'" :alt="product.title" />
+          </div>
+          <div class="card-footer">
+            <a href="#" class="text-decoration-none">{{ product.title }}</a>
+            <Rating :modelValue="product.reviewSummary.mean * 5 / 100" readonly :cancel="false" />
+            <p class="pt-1">{{ product.reviewSummary.total }} reviews</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </Dialog>
 </template>
 
 <script setup>
@@ -87,10 +140,16 @@ import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Rating from 'primevue/rating';
 import InputText from 'primevue/inputtext';
-import Tag from 'primevue/tag';
-import Toolbar from 'primevue/toolbar';
+import Toast from 'primevue/toast';
+import ConfirmDialog from 'primevue/confirmdialog';
 import Button from 'primevue/button';
+import Dialog from 'primevue/dialog';
+import Tag from 'primevue/tag';
+import Textarea from 'primevue/textarea';
 import InputSwitch from 'primevue/inputswitch';
+import { useConfirm } from "primevue/useconfirm";
+import { useToast } from "primevue/usetoast";
+import { useField, useForm } from 'vee-validate';
 import axios from 'axios';
 
 
@@ -100,6 +159,13 @@ onMounted(() => {
 
 const reviews = ref();
 const loading = ref(true);
+const confirm = useConfirm();
+const toast = useToast();
+const visible = ref(false);
+const review = ref();
+const product = ref();
+const { handleSubmit, resetForm } = useForm();
+const { value, errorMessage } = useField('value', validateField);
 
 const filters = ref({
   global: { value: null, matchMode: FilterMatchMode.CONTAINS },
@@ -158,6 +224,7 @@ function getPublishedReviews(event) {
     loading.value = false;
     if (event) {
       updateActive(event);
+      console.log(review)
     }
   });
 
@@ -172,4 +239,62 @@ function updateActive(event) {
   event.target.classList.remove("link-secondary");
   event.target.setAttribute("aria-current", "page");
 }
+
+const validate = (slotProps, value) => {
+
+  let updateMessage = value ? "Are you sure you want to publish this review ?" : "Are you sure you want to unpublish this review ?";
+  confirm.require({
+    message: updateMessage,
+    header: 'Confirmation',
+    icon: 'pi pi-exclamation-triangle',
+    accept: () => {
+      axios.put('https://127.0.0.1:8000/reviews/' + slotProps.data.id, {
+        isValidated: value
+      }).then(() => {
+        reviews.value[slotProps.index].isValidated = value;
+        toast.add({ severity: 'success', summary: 'Confirmed', detail: 'The review was modified successfuly', life: 3000 });
+      }).catch(function (error) {
+        console.log(error);
+      });
+    },
+    reject: () => {
+      toast.add({ severity: 'info', summary: 'No Change', detail: 'Nothing changed', life: 3000 });
+    }
+  });
+};
+
+function reply(id) {
+  axios.get('https://127.0.0.1:8000/shopify/admin/reviews/' + id).then(res => {
+    review.value = res.data;
+    axios.get('https://127.0.0.1:8000/shopify/admin/product/' + id).then(res => {
+      product.value = res.data;
+      visible.value = true;
+    })
+  });
+
+}
+
+function validateField(value) {
+  if (!value) {
+    return 'Description is required.';
+  }
+
+  return true;
+}
+
+const onSubmit = handleSubmit((values) => {
+  if (values.value && values.value.length > 0) {
+    console.log(values)
+    axios.post(
+      'https://127.0.0.1:8000/comments/' + review.value.id,
+      {
+        comment: values.value
+      }
+    ).then(() => {
+      visible.value = false
+      toast.add({ severity: 'info', summary: 'The reply was added successfuly', detail: values.value, life: 3000 });
+      resetForm();
+    })
+  }
+});
 </script>

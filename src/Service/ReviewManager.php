@@ -77,6 +77,7 @@ class ReviewManager
                                 $p = new Product();
                                 $p->setHandle($product["handle"]);
                                 $p->setTitle($product["title"]);
+                                $p->setImageSrc($product["featured_image"]);
                                 $p->setShop($shop);
                                 $this->em->persist($p);
                                 $this->em->flush();

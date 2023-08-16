@@ -8,6 +8,7 @@ use App\Repository\ProductRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: ProductRepository::class)]
 class Product
@@ -24,14 +25,20 @@ class Product
     private Collection $reviews;
 
     #[ORM\OneToOne(mappedBy: 'product', cascade: ['persist', 'remove'])]
+    #[Groups(['shop:review:read'])]
     private ?ReviewSummary $reviewSummary = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['shop:review:read'])]
     private ?string $title = null;
 
     #[ORM\ManyToOne(inversedBy: 'products')]
     #[ORM\JoinColumn(nullable: false)]
     private ?Shop $shop = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['shop:review:read'])]
+    private ?string $imageSrc = null;
 
     public function __construct()
     {
@@ -122,6 +129,18 @@ class Product
     public function setShop(?Shop $shop): static
     {
         $this->shop = $shop;
+
+        return $this;
+    }
+
+    public function getImageSrc(): ?string
+    {
+        return $this->imageSrc;
+    }
+
+    public function setImageSrc(?string $imageSrc): static
+    {
+        $this->imageSrc = $imageSrc;
 
         return $this;
     }
