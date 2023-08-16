@@ -58,9 +58,11 @@ class ReviewSummary
     private ?Product $product = null;
 
     #[ORM\Column(nullable: true)]
+    #[Groups(['shop:review:read'])]
     private ?int $total = null;
 
     #[ORM\Column(nullable: true)]
+    #[Groups(['shop:review:read'])]
     private ?int $mean = null;
 
 

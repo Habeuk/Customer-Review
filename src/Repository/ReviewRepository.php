@@ -77,6 +77,33 @@ class ReviewRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    public function findReviewsByShop(int $page = 1, $shop, $isUnpublished, $isPublished)
+    {
+        $pageSize = 10;
+        $firstResult = ($page - 1) * $pageSize;
+
+        $q = $this->createQueryBuilder('r')
+            ->leftJoin('r.product','p')
+            ->orderBy('r.id', 'DESC')
+            ->andWhere('p.shop = :shop')
+            ->setParameter('shop', $shop)
+            ->setFirstResult($firstResult)
+            ->setMaxResults($pageSize);
+
+        if ($isUnpublished) {
+            $q->andWhere('r.isValidated = :val')
+            ->setParameter('val', false);
+        }
+
+        if ($isPublished) {
+            $q->andWhere('r.isValidated = :val')
+            ->setParameter('val', true);
+        }
+
+        return $q->getQuery()
+            ->getResult();
+    }
+
 
     public function countReviewByNoteAndProduct($note, $product)
     {

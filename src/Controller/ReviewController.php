@@ -112,14 +112,17 @@ class ReviewController extends AbstractController
             $request->getContent(),
             Review::class,
             'json',
-            [AbstractNormalizer::OBJECT_TO_POPULATE => $currentReview]
+            [
+                AbstractNormalizer::OBJECT_TO_POPULATE => $currentReview,
+                'groups' => ['review:write'],
+            ]
         );
         $em->persist($updatedReview);
         $em->flush();
         return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
     }
 
-    #[Route('/review/{id}', name: 'app_review_get')]
+    #[Route('/reviews/{id}', name: 'app_review_get', methods: Request::METHOD_GET)]
     public function get(Review $review, SerializerInterface $serializer): JsonResponse
     {
         if ($review) {
