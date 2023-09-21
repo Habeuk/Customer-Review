@@ -182,7 +182,7 @@ function getReviews(event) {
     event.preventDefault();
   }
   loading.value = true;
-  HTTP.get('/shopify/admin/reviews').then(res => {
+  HTTP.get('/shopify/admin/api/v1/reviews').then(res => {
     reviews.value = res.data
     loading.value = false;
     if (event) {
@@ -207,7 +207,7 @@ function getUnpublishedReviews(event) {
     event.preventDefault();
   }
   loading.value = true;
-  axios.get('/shopify/admin/reviews?unpublished=1').then(res => {
+  axios.get('/shopify/admin/api/v1/reviews?unpublished=1').then(res => {
     reviews.value = res.data
     loading.value = false;
     if (event) {
@@ -222,7 +222,7 @@ function getPublishedReviews(event) {
     event.preventDefault();
   }
   loading.value = true;
-  axios.get('/shopify/admin/reviews?published=1').then(res => {
+  axios.get('/shopify/admin/api/v1/reviews?published=1').then(res => {
     reviews.value = res.data
     loading.value = false;
     if (event) {
@@ -267,9 +267,9 @@ const validate = (slotProps, value) => {
 };
 
 function reply(id) {
-  axios.get('/shopify/admin/reviews/' + id).then(res => {
+  axios.get('/shopify/admin/api/v1/reviews/' + id).then(res => {
     review.value = res.data;
-    axios.get('/shopify/admin/product/' + id).then(res => {
+    axios.get('/shopify/admin/api/v1/product/' + id).then(res => {
       product.value = res.data;
       visible.value = true;
     })
