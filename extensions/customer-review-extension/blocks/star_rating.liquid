@@ -1,0 +1,14 @@
+<link rel="stylesheet" href="https://reviews.habeuk.com/style.css">
+<script defer src="https://reviews.habeuk.com/ratingStars.umd.js"></script>
+<div
+  class="rating-app-item"
+  data-product-handler="{{ product.handle }}"
+></div>
+
+{% schema %}
+{
+  "name": "Star Rating",
+  "target": "section",
+  "settings": [{ "type": "product", "id": "product", "label": "product", "autofill": true }]
+}
+{% endschema %}
