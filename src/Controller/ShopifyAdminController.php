@@ -13,7 +13,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\SerializerInterface;
 
-#[Route('/shopify/admin')]
+#[Route('/shopify/admin/api/v1')]
 class ShopifyAdminController extends AbstractController
 {
     #[Route('/reviews', name: 'app_shopify_admin')]
