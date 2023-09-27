@@ -102,6 +102,9 @@ class Review
     #[Groups(['shop:review:read'])]
     private ?string $email = null;
 
+    #[ORM\ManyToOne(inversedBy: 'review')]
+    private ?Carousel $carousel = null;
+
     function __construct()
     {
         $this->createdAt = new DateTimeImmutable();
@@ -268,6 +271,18 @@ class Review
     public function setEmail(?string $email): static
     {
         $this->email = $email;
+
+        return $this;
+    }
+
+    public function getCarousel(): ?Carousel
+    {
+        return $this->carousel;
+    }
+
+    public function setCarousel(?Carousel $carousel): static
+    {
+        $this->carousel = $carousel;
 
         return $this;
     }
