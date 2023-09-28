@@ -56,12 +56,15 @@ class ReviewRepository extends ServiceEntityRepository
         $firstResult = ($page - 1) * $pageSize;
 
         $q = $this->createQueryBuilder('r')
-            ->leftJoin('r.product','p')
+            ->leftJoin('r.product', 'p')
             ->andWhere('p.shop = :shop')
             ->setParameter('shop', $shop)
             ->orderBy('r.id', 'DESC')
-            ->setFirstResult($firstResult)
-            ->setMaxResults($pageSize);
+            ->setMaxResults(10);
+        if ($shop->isIsABuyer()) {
+            $q->setFirstResult($firstResult)
+                ->setMaxResults($pageSize);
+        }
 
         if ($note) {
             $q->andWhere('r.note= :note')
@@ -83,21 +86,25 @@ class ReviewRepository extends ServiceEntityRepository
         $firstResult = ($page - 1) * $pageSize;
 
         $q = $this->createQueryBuilder('r')
-            ->leftJoin('r.product','p')
+            ->leftJoin('r.product', 'p')
             ->orderBy('r.id', 'DESC')
             ->andWhere('p.shop = :shop')
             ->setParameter('shop', $shop)
-            ->setFirstResult($firstResult)
-            ->setMaxResults($pageSize);
+            ->setMaxResults(10);
+            
+        if ($shop->isIsABuyer()) {
+            $q->setFirstResult($firstResult)
+                ->setMaxResults($pageSize);
+        }
 
         if ($isUnpublished) {
             $q->andWhere('r.isValidated = :val')
-            ->setParameter('val', false);
+                ->setParameter('val', false);
         }
 
         if ($isPublished) {
             $q->andWhere('r.isValidated = :val')
-            ->setParameter('val', true);
+                ->setParameter('val', true);
         }
 
         return $q->getQuery()
@@ -126,5 +133,4 @@ class ReviewRepository extends ServiceEntityRepository
             ->getQuery()
             ->getOneOrNullResult();
     }
-
 }

@@ -27,9 +27,11 @@ class Shop
     #[ORM\OneToOne(mappedBy: 'shop', cascade: ['persist', 'remove'])]
     private ?Carousel $carousel = null;
 
+    #[ORM\Column(nullable: true)]
+    private ?bool $isABuyer = null;
+
     public function __construct()
     {
-        $this->product = new ArrayCollection();
         $this->products = new ArrayCollection();
     }
 
@@ -105,6 +107,18 @@ class Shop
         }
 
         $this->carousel = $carousel;
+
+        return $this;
+    }
+
+    public function isIsABuyer(): ?bool
+    {
+        return $this->isABuyer;
+    }
+
+    public function setIsABuyer(?bool $isABuyer): static
+    {
+        $this->isABuyer = $isABuyer;
 
         return $this;
     }
