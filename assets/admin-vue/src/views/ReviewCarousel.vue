@@ -1,19 +1,21 @@
 
 <template>
     <div class="card">
-        <Carousel :value="products" :numVisible="3" :numScroll="3" :responsiveOptions="responsiveOptions">
+        <Carousel :value="reviews" :numVisible="3" :numScroll="3" :responsiveOptions="responsiveOptions">
             <template #item="slotProps">
-                <div class="border-1 surface-border border-round m-2 text-center py-5 px-3">
-                    <div class="mb-3">
-                        <img :src="'https://primefaces.org/cdn/primevue/images/product/' + slotProps.data.image" :alt="slotProps.data.name" class="w-6 shadow-2" />
+                <div class="">
+                    <div class="d-flex mb-4">
+                        <Rating :modelValue="slotProps.data.note" readonly :cancel="false" /> <span class="mx-2 fs-6 fs-italic">le {{
+                            formatDate(slotProps.data.created_at) }}</span>
                     </div>
-                    <div>
-                        <h4 class="mb-1">{{ slotProps.data.name }}</h4>
-                        <h6 class="mt-0 mb-3">${{ slotProps.data.price }}</h6>
-                        <Tag :value="slotProps.data.inventoryStatus" :severity="getSeverity(slotProps.data.inventoryStatus)" />
-                        <div class="mt-5">
-                            <Button icon="pi pi-search" rounded class="mr-2" />
-                            <Button icon="pi pi-star-fill" rounded severity="success" class="mr-2" />
+                    <div class="d-flex">
+                        <div class="d-flex flex-column">
+                            <img class="" :src="slotProps.data.product.imageSrc + '&width=80'" :alt="slotProps.data.product.title" :width="80" :height="80">
+                            <span class="fs-6">{{ slotProps.data.product.title }}</span>
+                        </div>
+                        <div class="blockquote text-left ">
+                            <p class="fs-6">{{ slotProps.data.description }}</p>
+                            <footer class="blockquote-footer fs-6">{{ slotProps.data.name }}</footer>
                         </div>
                     </div>
                 </div>
@@ -24,13 +26,17 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
-import { ProductService } from '@/service/ProductService';
+import { HTTP } from '../http-common';
+import Carousel from 'primevue/carousel';
+import Rating from 'primevue/rating';
+
 
 onMounted(() => {
-    ProductService.getProductsSmall().then((data) => (products.value = data.slice(0, 9)));
+    getCarouselReviews();
 })
 
-const products = ref();
+const reviews = ref();
+const loading = ref(false);
 const responsiveOptions = ref([
     {
         breakpoint: '1199px',
@@ -49,20 +55,23 @@ const responsiveOptions = ref([
     }
 ]);
 
-const getSeverity = (status) => {
-    switch (status) {
-        case 'INSTOCK':
-            return 'success';
+function getCarouselReviews() {
+    loading.value = true;
+    HTTP.get('/api/v1/carousel').then(res => {
+        reviews.value = res.data
+        loading.value = false;
+        console.log(reviews.value)
+    }).catch(function (error) {
+        loading.value = false;
+    });
+}
 
-        case 'LOWSTOCK':
-            return 'warning';
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
+    return date.toLocaleDateString('fr-FR', options);
+}
 
-        case 'OUTOFSTOCK':
-            return 'danger';
 
-        default:
-            return null;
-    }
-};
 
 </script>

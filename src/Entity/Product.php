@@ -29,7 +29,7 @@ class Product
     private ?ReviewSummary $reviewSummary = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['shop:review:read'])]
+    #[Groups(['shop:review:read', 'review:read'])]
     private ?string $title = null;
 
     #[ORM\ManyToOne(inversedBy: 'products')]
@@ -37,7 +37,7 @@ class Product
     private ?Shop $shop = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['shop:review:read'])]
+    #[Groups(['shop:review:read', 'review:read'])]
     private ?string $imageSrc = null;
 
     public function __construct()
