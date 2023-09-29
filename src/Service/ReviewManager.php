@@ -3,6 +3,8 @@
 namespace App\Service;
 
 use App\Entity\Product;
+use App\Entity\ReviewSummary;
+use App\Entity\Shop;
 use App\Repository\ProductRepository;
 use App\Repository\ReviewRepository;
 use App\Repository\ReviewSummaryRepository;
@@ -55,13 +57,13 @@ class ReviewManager
 
     public function getProduct(?string $handle, string $shopName): ?Product
     {
-        $shop = $this->shopRepository->findOneBy(['name' => $shopName]);
+        $shop = $this->em->getRepository(Shop::class)->findOneBy(['name' => $shopName]);
         if ($shop) {
             $productCache = $this->cache->getItem("product_cache_" . $handle . "_" . $shopName);
             if ($productCache->isHit()) {
                 return $productCache->get();
             } else {
-                $product = $this->productRepository->findOneByShopAndHandle($handle, $shop);
+                $product = $this->em->getRepository(Product::class)->findOneByShopAndHandle($handle, $shop);
                 if ($product) {
                     $productCache->expiresAfter(600);
                     $this->cache->save($productCache->set($product));
@@ -115,7 +117,7 @@ class ReviewManager
         $pageReview = $this->cache->getItem($name);
         if (!$pageReview->isHit()) {
             if ($minify == "1") {
-                $product = $this->productRepository->findOneByShopAndHandle($handle, $shop);
+                $product = $this->em->getRepository(Product::class)->findOneByShopAndHandle($handle, $shop);
                 $summary = $product->getReviewSummary();
                 $result = [];
                 $result["mean"] = $summary->getMean();
@@ -141,9 +143,9 @@ class ReviewManager
                     $review->reponse = "";
                 }
                 $result["review"] = $reviews;
-                $product = $this->productRepository->findOneByHandle($handle);
+                $product = $this->em->getRepository(Product::class)->findOneByHandle($handle);
                 if ($product) {
-                    $summary = $this->summaryRepository->findOneByProduct($product);
+                    $summary = $this->em->getRepository(ReviewSummary::class)->findOneByProduct($product);
                     $summaryArray = [
                         'note_1' => $summary->getNote1(),
                         'note_2' => $summary->getNote2(),
@@ -158,7 +160,7 @@ class ReviewManager
                 $this->cache->save($pageReview->set(json_encode($result)));
                 return json_encode($result);
             }
-        } else {
+         } else {
             return $pageReview->get();
         }
     }

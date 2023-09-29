@@ -1,0 +1,14 @@
+<link rel="stylesheet" href="https://reviews.habeuk.com/style.css">
+<script defer src="https://reviews.habeuk.com/ratingApp.umd.js"></script>
+<div id="app" data-product-handler="{{ product.handle }}"></div>
+
+{% schema %}
+{
+  "name": "Review summary",
+  "target": "section",
+  "settings": [
+    { "type": "product", "id": "product", "label": "product", "autofill": true },
+    { "type": "color", "id": "colour", "label": "Star Colour", "default": "#ff0000" }
+  ]
+}
+{% endschema %}

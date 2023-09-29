@@ -22,6 +22,7 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Contracts\Cache\CacheInterface;
 
 #[ApiResource()]
+#[Route('api/v1')]
 class ReviewController extends AbstractController
 {
     #[Route('/reviews', name: 'app_review', methods: Request::METHOD_GET)]

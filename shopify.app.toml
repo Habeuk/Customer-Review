@@ -1,0 +1,21 @@
+# Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
+
+name = "Customer review"
+client_id = "cc45195c0de88e513323fdfcd118cd50"
+application_url = "https://1c34-102-244-45-140.ngrok-free.app"
+embedded = true
+
+[access_scopes]
+# Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
+use_legacy_install_flow = true
+
+[auth]
+redirect_urls = [
+  "https://1c34-102-244-45-140.ngrok-free.app/api/oauth/redirect"
+]
+
+[webhooks]
+api_version = "2023-07"
+
+[pos]
+embedded = false
