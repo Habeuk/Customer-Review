@@ -13,14 +13,10 @@ use Symfony\Component\Routing\Annotation\Route;
 class ShopController extends AbstractController
 {
     #[Route('/premium', name: 'app_shop', methods: Request::METHOD_GET)]
-    public function index(ShopRepository $shopRepository): JsonResponse
+    public function index(ShopRepository $shopRepository, Request $request): JsonResponse
     {
 
-        if ($_SERVER["APP_ENV"] == "dev") {
-            $shopName = "madok-co.myshopify.com";
-        } else if ($_SERVER["APP_ENV"] = "prod") {
-            $shopName = parse_url($_SERVER["HTTP_REFERER"], PHP_URL_HOST);
-        }
+        $shopName = $request->get('shop');
         $shop = $shopRepository->findOneBy(['name' => $shopName]);
 
         if ($shop) {

@@ -8,6 +8,7 @@ use App\Service\ProductManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Contracts\Cache\CacheInterface;
@@ -19,15 +20,12 @@ class ProductController extends AbstractController
         ShopRepository $shopRepository, 
         CacheInterface $cacheInterface,
         EntityManagerInterface $em,
-        ProductRepository $productRepository
+        ProductRepository $productRepository,
+        Request $request,
         ): Response
     {
         $produtManager = new ProductManager($shopRepository, $cacheInterface, $em, $productRepository);
-        if ($_SERVER["APP_ENV"] == "dev") {
-            $shop = "madok-co.myshopify.com";
-        } else if ($_SERVER["APP_ENV"] = "prod") {
-            $shop = parse_url($_SERVER["HTTP_REFERER"], PHP_URL_HOST);
-        }
+        $shop = $request->get('shop');
 
         $products = $produtManager->getProducts($shop);
 
