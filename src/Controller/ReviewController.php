@@ -22,9 +22,10 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Contracts\Cache\CacheInterface;
 
 #[ApiResource()]
+#[Route('api/v1')]
 class ReviewController extends AbstractController
 {
-    #[Route('api/v1/reviews', name: 'app_review', methods: Request::METHOD_GET)]
+    #[Route('/reviews', name: 'app_review', methods: Request::METHOD_GET)]
     public function index(
         ReviewRepository $reviewRepository,
         SerializerInterface $serializer,

@@ -24,9 +24,14 @@ class Shop
     #[ORM\OneToMany(mappedBy: 'shop', targetEntity: Product::class, orphanRemoval: true)]
     private Collection $products;
 
+    #[ORM\OneToOne(mappedBy: 'shop', cascade: ['persist', 'remove'])]
+    private ?Carousel $carousel = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?bool $isABuyer = null;
+
     public function __construct()
     {
-        $this->product = new ArrayCollection();
         $this->products = new ArrayCollection();
     }
 
@@ -85,6 +90,35 @@ class Shop
                 $product->setShop(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getCarousel(): ?Carousel
+    {
+        return $this->carousel;
+    }
+
+    public function setCarousel(Carousel $carousel): static
+    {
+        // set the owning side of the relation if necessary
+        if ($carousel->getShop() !== $this) {
+            $carousel->setShop($this);
+        }
+
+        $this->carousel = $carousel;
+
+        return $this;
+    }
+
+    public function isIsABuyer(): ?bool
+    {
+        return $this->isABuyer;
+    }
+
+    public function setIsABuyer(?bool $isABuyer): static
+    {
+        $this->isABuyer = $isABuyer;
 
         return $this;
     }

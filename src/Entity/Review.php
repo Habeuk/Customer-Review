@@ -79,6 +79,7 @@ class Review
     
     #[ORM\ManyToOne(inversedBy: 'reviews')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['review:read'])]
     private ?Product $product = null;
 
     #[ORM\Column(options: ["default" => 0])]
@@ -101,6 +102,9 @@ class Review
     #[ORM\Column(length: 255, nullable: true)]
     #[Groups(['shop:review:read'])]
     private ?string $email = null;
+
+    #[ORM\ManyToOne(inversedBy: 'review')]
+    private ?Carousel $carousel = null;
 
     function __construct()
     {
@@ -268,6 +272,18 @@ class Review
     public function setEmail(?string $email): static
     {
         $this->email = $email;
+
+        return $this;
+    }
+
+    public function getCarousel(): ?Carousel
+    {
+        return $this->carousel;
+    }
+
+    public function setCarousel(?Carousel $carousel): static
+    {
+        $this->carousel = $carousel;
 
         return $this;
     }
