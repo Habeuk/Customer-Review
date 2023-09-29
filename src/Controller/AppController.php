@@ -15,7 +15,7 @@ class AppController extends AbstractController
     public function index(Request $request): Response
     {
         if (Context::$IS_EMBEDDED_APP &&  $request->get("embedded", false) === "1") {
-            return $this->redirect($this->generateUrl("app_admin"));
+            return $this->redirect($this->generateUrl("app_admin") . "?shop=" . $request->get("shop"));
         } else {
             $params = $request->query->all();
             return $this->redirect($this->generateUrl("app_install"). "?" . http_build_query($params));

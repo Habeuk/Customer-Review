@@ -31,11 +31,7 @@ class ShopifyAdminController extends AbstractController
         SerializerInterface $serializer
     ): Response {
         $page = $request->get('page', 1);
-        if ($_SERVER["APP_ENV"] == "dev") {
-            $shopName = "madok-co.myshopify.com";
-        } else if ($_SERVER["APP_ENV"] = "prod") {
-            $shopName = parse_url($_SERVER["HTTP_REFERER"], PHP_URL_HOST);
-        }
+        $shopName = $request->get('shop');
 
         $shop = $shopRepository->findOneBy(['name' => $shopName]);
         $isUnpublished = $request->get('unpublished') == '1' ? true : false;
@@ -89,11 +85,7 @@ class ShopifyAdminController extends AbstractController
         CacheInterface $cache,
     ): Response {
 
-        if ($_SERVER["APP_ENV"] == "dev") {
-            $shopName = "madok-co.myshopify.com";
-        } else if ($_SERVER["APP_ENV"] = "prod") {
-            $shopName = parse_url($_SERVER["HTTP_REFERER"], PHP_URL_HOST);
-        }
+        $shopName = $request->get('shop');
 
         $review = new Review();
         $data = json_decode($request->getContent(), true);

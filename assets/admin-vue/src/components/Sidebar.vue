@@ -15,6 +15,7 @@ import { HTTP } from '../http-common';
 
 const visible = ref(false);
 const loading = ref(false);
+const shop = ref();
 
 const items = ref([
   {
@@ -59,11 +60,13 @@ const items = ref([
 ]);
 
 onMounted(() => {
+  const shopAttributes = document.getElementById("shop-attributes");
+  shop.value = shopAttributes.getAttribute("data-shop");
   showUpgradeButton();
 });
 
 function showUpgradeButton() {
-  HTTP.get('/api/v1/premium').then( res => {
+  HTTP.get('/api/v1/premium?shop=' + shop.value).then( res => {
     visible.value = !res.data;
   }).catch(function(res){
     console.log(res)

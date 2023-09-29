@@ -51,11 +51,7 @@ class ReviewController extends AbstractController
             $cache
         );
 
-        if ($_SERVER["APP_ENV"] == "dev") {
-            $shop = "madok-co.myshopify.com";
-        } else if ($_SERVER["APP_ENV"] = "prod") {
-            $shop = parse_url($_SERVER["HTTP_REFERER"], PHP_URL_HOST);
-        }
+        $shopName = $request->get('shop');
 
 
         $product = $reviewManager->getProduct($handle, $shop);
