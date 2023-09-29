@@ -11,7 +11,6 @@ use App\Repository\ShopRepository;
 use App\Service\ReviewManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -51,7 +50,7 @@ class ReviewController extends AbstractController
             $cache
         );
 
-        $shopName = $request->get('shop');
+        $shop = parse_url($_SERVER["HTTP_REFERER"], PHP_URL_HOST);
 
 
         $product = $reviewManager->getProduct($handle, $shop);
