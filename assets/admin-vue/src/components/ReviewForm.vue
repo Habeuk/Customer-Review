@@ -1,8 +1,9 @@
 <template>
+    <Toast />
     <Dialog v-model:visible="visible" modal header="Add a Review" :style="{ width: '45vw' }" :modal="true"
-        @update:visible="hideHandler">
-        <div class="card">
-            <form @submit="submitReviewForm" class="form">
+        @reviewFormSubmited="hideHandler" @reviewFormVisible="showModal()">
+        <div class="card" @review-form:submited="hideForm()">
+            <form @submit="submitReviewForm($event)" class="form">
                 <div class="card-body">
                     <h5 class="card-title mb-4">Reply to review</h5>
 
@@ -57,7 +58,7 @@
                     <small id="text-error" class="p-error">{{ errorMessage || '&nbsp;' }}</small>
                 </div>
                 <div class="card-footer bg-white d-flex justify-content-end mt-2 pt-4">
-                    <Button label="Post reply" :type="'submit'" severity="help" />
+                    <Button label="Post reply" :type="'submit'" severity="help" @click="submit()" />
                 </div>
             </form>
         </div>
@@ -74,21 +75,22 @@ import Rating from 'primevue/rating';
 import Textarea from 'primevue/textarea';
 import { useField, useForm } from 'vee-validate';
 import { HTTP } from '../http-common';
+import Toast from 'primevue/toast';
 
 
 const { value, errorMessage } = useField('value', validateField);
+import { useToast } from "primevue/usetoast";
 const ratingNote = ref();
 const selectedProduct = ref();
 const userName = ref();
 const email = ref();
+const toast = useToast();
 const title = ref();
 const reviewText = ref();
 const products = ref();
-const visible = defineProps({
-    value: Boolean
-});
+const { handleSubmit, resetForm } = useForm();
+const visible = ref(false);
 const modalVisible = ref(visible);
-
 
 onMounted(() => {
     getProducts();
@@ -115,5 +117,43 @@ function getProducts() {
 
 function hideHandler(value) { if (!value) { modalVisible.value = false; } }
 
+function resetReviewForm() {
+  ratingNote.value = '';
+  selectedProduct.value = '';
+  userName.value = '';
+  email.value = '';
+  title.value = '';
+  reviewText.value = '';
+  products.value = '';
+}
 
+const submitReviewForm = handleSubmit((values) => {
+  HTTP.post(
+    '/shopify/admin/api/v1/reviews',
+    {
+      name: userName.value,
+      email: email.value,
+      title: title.value,
+      note: ratingNote.value,
+      handle: selectedProduct.value.handle,
+      description: reviewText.value
+    }
+  ).then(() => {
+    visible.value = false;
+    toast.add({ severity: 'info', summary: 'The review was added successfuly', detail: values.value, life: 3000 });
+    resetReviewForm();
+  });
+});
+
+function submit() {
+    defineEmits("reviewFormSubmited");
+}
+
+function hideForm() {
+    visible.value = false;
+}
+
+function showModal() {
+    visible.value = true;
+}
 </script>

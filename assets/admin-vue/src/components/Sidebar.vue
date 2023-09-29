@@ -1,12 +1,20 @@
 <template>
-    <div class="card flex justify-content-center">
-          <PanelMenu :model="items" class="w-100" />
-        </div>
+  <div class="card flex justify-content-center">
+    <PanelMenu :model="items" class="w-100" />
+  </div>
+  <div class="mt-5">
+    <Button v-if="visible" icon="pi pi-bolt" :loading="loading" label="Upgrade to premium" class="w-100" @click="upgrade()" />
+  </div>
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import PanelMenu from 'primevue/panelmenu';
+import Button from 'primevue/button';
+import { HTTP } from '../http-common';
+
+const visible = ref(false);
+const loading = ref(false);
 
 const items = ref([
   {
@@ -49,5 +57,27 @@ const items = ref([
     icon: 'pi pi-tag',
   }
 ]);
+
+onMounted(() => {
+  showUpgradeButton();
+});
+
+function showUpgradeButton() {
+  HTTP.get('/api/v1/premium').then( res => {
+    visible.value = !res.data;
+  }).catch(function(res){
+    console.log(res)
+  });
+}
+
+function upgrade() {
+  loading.value = true;
+  HTTP.get('/api/v1/subscription').then( res => {
+    window.location.href = res.data.confirmationUrl;
+    console.log(res.data)
+  }).catch(function(res){
+    console.log(res)
+  });
+}
 
 </script>
