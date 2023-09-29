@@ -1,8 +1,8 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
-name = "Customer review"
-client_id = "cc45195c0de88e513323fdfcd118cd50"
-application_url = "https://1c34-102-244-45-140.ngrok-free.app"
+name = "Customer Reviews"
+client_id = "296e9d062cb95bbdd43226c8a2dc8375"
+application_url = "https://reviews.habeuk.com/app"
 embedded = true
 
 [access_scopes]
@@ -11,7 +11,8 @@ use_legacy_install_flow = true
 
 [auth]
 redirect_urls = [
-  "https://1c34-102-244-45-140.ngrok-free.app/api/oauth/redirect"
+  "https://reviews.habeuk.com/api/oauth/install",
+  "https://reviews.habeuk.com/api/oauth/redirect"
 ]
 
 [webhooks]
