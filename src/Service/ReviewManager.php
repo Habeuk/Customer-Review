@@ -151,11 +151,11 @@ class ReviewManager
                 if ($product) {
                     $summary = $this->em->getRepository(ReviewSummary::class)->findOneByProduct($product);
                     $summaryArray = [
-                        'note_1' => $summary->getNote1(),
-                        'note_2' => $summary->getNote2(),
-                        'note_3' => $summary->getNote3(),
-                        'note_4' => $summary->getNote4(),
                         'note_5' => $summary->getNote5(),
+                        'note_4' => $summary->getNote4(),
+                        'note_3' => $summary->getNote3(),
+                        'note_2' => $summary->getNote2(),
+                        'note_1' => $summary->getNote1(),
                     ];
                     $result["summary"] = $summaryArray;
                 }
