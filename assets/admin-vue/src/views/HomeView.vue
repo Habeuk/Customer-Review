@@ -428,6 +428,7 @@ const submitReviewForm = handleSubmit((values) => {
     addReviewVisible.value = false
     toast.add({ severity: 'info', summary: 'The review was added successfuly', detail: values.value, life: 3000 });
     resetReviewForm();
+    getReviews();
   });
 });
 
