@@ -118,13 +118,18 @@ class ReviewController extends AbstractController
         return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
     }
 
-    #[Route('/reviews/{id}', name: 'app_review_get', methods: Request::METHOD_GET)]
-    public function get(Review $review, SerializerInterface $serializer): JsonResponse
+    #[Route('/reviews/{handle}', name: 'app_review_get', methods: Request::METHOD_GET)]
+    public function get($handle, SerializerInterface $serializer, ProductRepository $productRepository): JsonResponse
     {
-        if ($review) {
+        $product = $productRepository->findOneBy(["handle" => $handle]);
+        if ($product) {
+            $summary = $product->getReviewSummary();
 
-            $jsonReviews = $serializer->serialize($review, 'json', ['groups' => 'review:read']);
-            return new JsonResponse($jsonReviews, Response::HTTP_OK, ['accept' => 'json'], true);
+            $result = [];
+                $result["mean"] = $summary->getMean();
+                $result["count"] = $summary->getTotal();
+            
+            return new JsonResponse($result, Response::HTTP_OK, ['accept' => 'json']);
         }
 
         return new JsonResponse(null, Response::HTTP_NOT_FOUND);
@@ -134,17 +139,17 @@ class ReviewController extends AbstractController
     public function like(Review $review, EntityManagerInterface $em, Request $request): Response
     {
         $reset = $request->get("reset");
-        if ($reset) {
+        if ($reset && $review->getLikes()) {
             $review->setLikes($review->getLikes() - 1);
         } else {
             $review->setLikes($review->getLikes() + 1);
         }
         $em->flush();
-        
+
         return new JsonResponse(['ok' => true], Response::HTTP_OK);
     }
 
-    #[Route('/dislike/{id}', name: 'app_review_like')]
+    #[Route('/dislike/{id}', name: 'app_review_dislike')]
     public function dislike(Review $review, EntityManagerInterface $em, Request $request): Response
     {
         $reset = $request->get("reset");
@@ -154,7 +159,7 @@ class ReviewController extends AbstractController
             $review->setDislikes($review->getDislikes() + 1);
         }
         $em->flush();
-        
+
         return new JsonResponse(['ok' => true], Response::HTTP_OK);
     }
 }

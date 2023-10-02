@@ -57,12 +57,16 @@ class ReviewManager
 
     public function getProduct(?string $handle, string $shopName): ?Product
     {
-        $shop = $this->em->getRepository(Shop::class)->findOneBy(['name' => $shopName]);
+        $shop = $this->em->getRepository(Shop::class)->findOneBy(['domain' => $shopName]);
+        if ($shop == null) {
+            $shop = $this->em->getRepository(Shop::class)->findOneBy(['name' => $shopName]);
+        }
+        
         if ($shop) {
             $productCache = $this->cache->getItem("product_cache_" . $handle . "_" . $shopName);
-            if ($productCache->isHit()) {
+            /* if ($productCache->isHit()) {
                 return $productCache->get();
-            } else {
+            } else { */
                 $product = $this->em->getRepository(Product::class)->findOneByShopAndHandle($handle, $shop);
                 if ($product) {
                     $productCache->expiresAfter(600);
@@ -91,7 +95,7 @@ class ReviewManager
                         }
                     }
                 }
-            }
+            //}
         }
 
         return null;
@@ -101,7 +105,7 @@ class ReviewManager
     {
         $cacheNames = $this->cache->getItem($shop->getName() . "_" . $handle);
         $name = $this->getCacheName($shop->getName(), $handle, $page, $note, $minify);
-        if ($cacheNames->isHit()) {
+        /* if ($cacheNames->isHit()) {
             $value = $cacheNames->get();
             if (!key_exists($name, $value)) {
                 $value["$name"] = $name;
@@ -112,10 +116,10 @@ class ReviewManager
             $this->cache->save($cacheNames->set([
                 "$name" => $name
             ]));
-        }
+        } */
 
         $pageReview = $this->cache->getItem($name);
-        if (!$pageReview->isHit()) {
+        //if (!$pageReview->isHit()) {
             if ($minify == "1") {
                 $product = $this->em->getRepository(Product::class)->findOneByShopAndHandle($handle, $shop);
                 $summary = $product->getReviewSummary();
@@ -160,9 +164,9 @@ class ReviewManager
                 $this->cache->save($pageReview->set(json_encode($result)));
                 return json_encode($result);
             }
-         } else {
+        /* } else {
             return $pageReview->get();
-        }
+        } */
     }
 
     /**
