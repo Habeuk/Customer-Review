@@ -66,8 +66,9 @@ import Sidebar from '../components/Sidebar.vue';
 
 
 onMounted(() => {
-  getPublishedReviews();
+  const shopAttributes = document.getElementById("shop-attributes");
   shop.value = shopAttributes.getAttribute("data-shop");
+  getPublishedReviews();
 });
 
 const reviews = ref();
