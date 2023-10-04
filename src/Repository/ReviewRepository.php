@@ -58,7 +58,7 @@ class ReviewRepository extends ServiceEntityRepository
         $q = $this->createQueryBuilder('r')
             ->leftJoin('r.product', 'p')
             ->andWhere('p.shop = :shop')
-            ->andWhere('r.isPublished = :isValidated')
+            ->andWhere('r.isValidated = :isValidated')
             ->setParameter('shop', $shop)
             ->orderBy('r.id', 'DESC')
             ->setMaxResults(10)
