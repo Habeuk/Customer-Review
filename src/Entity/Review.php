@@ -53,6 +53,7 @@ class Review
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[ORM\JoinColumn(nullable: true)]
     #[Groups(['review:read', 'review:write', 'shop:review:read'])]
     private ?string $title = null;
 
@@ -96,6 +97,7 @@ class Review
     private Collection $comments;
 
     #[ORM\Column(length: 255)]
+    #[ORM\JoinColumn(nullable: true)]
     #[Groups(['review:read','review:write', 'shop:review:read'])]
     private ?string $name = null;
 
