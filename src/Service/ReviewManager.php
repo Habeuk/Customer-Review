@@ -3,6 +3,7 @@
 namespace App\Service;
 
 use App\Entity\Product;
+use App\Entity\Review;
 use App\Entity\ReviewSummary;
 use App\Entity\Shop;
 use App\Repository\ProductRepository;
@@ -21,7 +22,6 @@ class ReviewManager
 {
     private EntityManagerInterface $em;
     private SerializerInterface $serializer;
-    private ReviewRepository $reviewRepository;
     private CacheInterface $cache;
 
     function __construct(
@@ -121,7 +121,7 @@ class ReviewManager
                 return json_encode($result);
             }
 
-            $reviews = $this->reviewRepository->findReviews($shop, $page, $note, $handle);
+            $reviews = $this->em->getRepository(Review::class)->findReviews($shop, $page, $note, $handle);
             if ($reviews) {
                 $jsonReviews = $this->serializer->serialize($reviews, 'json', ['groups' => 'review:read']);
                 $reviews = json_decode($jsonReviews);
