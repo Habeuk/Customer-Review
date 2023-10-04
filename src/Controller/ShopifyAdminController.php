@@ -11,6 +11,7 @@ use App\Repository\ReviewRepository;
 use App\Repository\ShopRepository;
 use App\Service\CarouselManager;
 use App\Service\ProductManager;
+use App\Service\ReviewManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -120,6 +121,13 @@ class ShopifyAdminController extends AbstractController
 
             $em->persist($review);
             $em->flush();
+            $reviewManager = new ReviewManager(
+                $em,
+                $serializer,
+                $cache
+            );
+
+            $reviewManager->updateSummary($review->getId());
 
             $jsonReviews = $serializer->serialize($review, 'json', ['groups' => 'review:read']);
             return new JsonResponse($jsonReviews, Response::HTTP_OK, ['accept' => 'json'], true);

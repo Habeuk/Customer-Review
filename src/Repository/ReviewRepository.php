@@ -82,7 +82,7 @@ class ReviewRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    public function findReviewsByShop(int $page = 1, $shop, $isUnpublished, $isPublished)
+    public function findReviewsByShop(int $page = 1, $shop = null, $isUnpublished = null, $isPublished = null)
     {
         $pageSize = 10;
         $firstResult = ($page - 1) * $pageSize;
@@ -120,8 +120,10 @@ class ReviewRepository extends ServiceEntityRepository
             ->select('count(r.id) as count')
             ->andWhere('r.note = :note')
             ->andWhere('r.product = :product')
+            ->andWhere('r.isValidated = :isValidated')
             ->setParameter('note', $note)
             ->setParameter('product', $product)
+            ->setParameter('isValidated', true)
             ->getQuery()
             ->getOneOrNullResult();
     }
