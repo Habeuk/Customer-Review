@@ -25,7 +25,6 @@ class Product
     private Collection $reviews;
 
     #[ORM\OneToOne(mappedBy: 'product', cascade: ['persist', 'remove'])]
-    #[Groups(['shop:review:read'])]
     private ?ReviewSummary $reviewSummary = null;
 
     #[ORM\Column(length: 255)]

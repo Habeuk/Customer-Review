@@ -49,7 +49,8 @@
                     @click="addReview()" />
                 </div>
               </div>
-              <DataTable v-model:selection="selectedReviews" :value="reviews" tableStyle="min-width: 50rem" :loading="loading">
+              <DataTable v-model:selection="selectedReviews" :value="reviews" tableStyle="min-width: 50rem"
+                :loading="loading">
                 <template #header>
                   <div class="flex justify-content-end">
                     <div class="p-input-icon-left">
@@ -59,6 +60,11 @@
                   </div>
                 </template>
                 <Column selectionMode="multiple" headerStyle="width: 3rem"></Column>
+                <Column field="product" header="Product">
+                  <template #body="slotProps">
+                    <p>{{ slotProps.data.product.title }}</p>
+                  </template>
+                </Column>
                 <Column field="note" header="Reviews">
                   <template #body="slotProps">
                     <Rating :modelValue="slotProps.data.note" readonly :cancel="false" />
