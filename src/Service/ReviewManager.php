@@ -19,27 +19,16 @@ use Symfony\Contracts\Cache\CacheInterface;
 
 class ReviewManager
 {
-    private ShopRepository $shopRepository;
-    private ProductRepository $productRepository;
     private EntityManagerInterface $em;
     private SerializerInterface $serializer;
-    private ReviewSummaryRepository $summaryRepository;
     private ReviewRepository $reviewRepository;
     private CacheInterface $cache;
 
     function __construct(
-        ShopRepository $shopRepository,
         EntityManagerInterface $em,
-        ProductRepository $productRepository,
         SerializerInterface $serializer,
-        ReviewSummaryRepository $summaryRepository,
-        ReviewRepository $reviewRepository,
         CacheInterface $cache,
     ) {
-        $this->shopRepository = $shopRepository;
-        $this->productRepository = $productRepository;
-        $this->summaryRepository = $summaryRepository;
-        $this->reviewRepository = $reviewRepository;
         $this->serializer = $serializer;
         $this->em = $em;
         $this->cache = $cache;

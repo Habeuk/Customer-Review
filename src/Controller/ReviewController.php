@@ -26,12 +26,8 @@ class ReviewController extends AbstractController
 {
     #[Route('/reviews', name: 'app_review', methods: Request::METHOD_GET)]
     public function index(
-        ReviewRepository $reviewRepository,
         SerializerInterface $serializer,
         Request $request,
-        ReviewSummaryRepository $summaryRepository,
-        ProductRepository $productRepository,
-        ShopRepository $shopRepository,
         EntityManagerInterface $em,
         CacheInterface $cache
     ): Response {
@@ -41,12 +37,8 @@ class ReviewController extends AbstractController
         $minify = $request->get("minify");
 
         $reviewManager = new ReviewManager(
-            $shopRepository,
             $em,
-            $productRepository,
             $serializer,
-            $summaryRepository,
-            $reviewRepository,
             $cache
         );
 
@@ -65,19 +57,34 @@ class ReviewController extends AbstractController
         return new JsonResponse(null, Response::HTTP_NOT_FOUND);
     }
 
-    #[Route('/reviews', name: 'app_review_add', methods: Request::METHOD_POST)]
-    public function add(EntityManagerInterface $em, Request $request, ValidatorInterface $validator, SerializerInterface $serializer, ProductRepository $productRepository): Response
-    {
-        $review = new Review();
-        $data = $request->request->all();
+    #[Route('/reviews/{handle}', name: 'app_review_add', methods: Request::METHOD_POST)]
+    public function add(
+        EntityManagerInterface $em,
+        Request $request,
+        ValidatorInterface $validator,
+        SerializerInterface $serializer,
+        CacheInterface $cache,
+        $handle
+    ): Response {
+        $data = json_decode($request->getContent(), true);
 
-        $review->setTitle($data["title"]);
+        $review = new Review();
+
+        $review->setTitle($data["title"] ?? '');
         $review->setDescription($data["description"]);
         $review->setNote((int) $data["note"]);
         $review->setLikes(0);
         $review->setDislikes(0);
 
-        $product = $productRepository->findOneByHandle($data["handle"]);
+        $reviewManager = new ReviewManager(
+            $em,
+            $serializer,
+            $cache
+        );
+
+        $shop = parse_url($_SERVER["HTTP_REFERER"], PHP_URL_HOST);
+
+        $product = $reviewManager->getProduct($handle, $shop);
 
         $review->setProduct($product);
 
@@ -93,6 +100,8 @@ class ReviewController extends AbstractController
 
             return new Response($errorsString);
         }
+
+        $shop = parse_url($_SERVER["HTTP_REFERER"], PHP_URL_HOST);
 
         $em->persist($review);
         $em->flush();
@@ -126,9 +135,9 @@ class ReviewController extends AbstractController
             $summary = $product->getReviewSummary();
 
             $result = [];
-                $result["mean"] = $summary->getMean();
-                $result["count"] = $summary->getTotal();
-            
+            $result["mean"] = $summary->getMean();
+            $result["count"] = $summary->getTotal();
+
             return new JsonResponse($result, Response::HTTP_OK, ['accept' => 'json']);
         }
 
