@@ -49,7 +49,7 @@
                     @click="addReview()" />
                 </div>
               </div>
-              <DataTable :value="reviews" tableStyle="min-width: 50rem" :loading="loading">
+              <DataTable v-model:selection="selectedReviews" :value="reviews" tableStyle="min-width: 50rem" :loading="loading">
                 <template #header>
                   <div class="flex justify-content-end">
                     <div class="p-input-icon-left">
@@ -263,6 +263,7 @@ const products = ref();
 const modalVisible = ref(visible);
 const toast = useToast();
 const shop = ref();
+const selectedReviews = ref([]);
 
 const filters = ref({
   global: { value: null, matchMode: FilterMatchMode.CONTAINS },
@@ -322,7 +323,6 @@ function getPublishedReviews(event) {
     loading.value = false;
     if (event) {
       updateActive(event);
-      console.log(review)
     }
   });
 
@@ -382,7 +382,6 @@ function validateField() {
 
 const onSubmit = handleSubmit((values) => {
   if (values.value && values.value.length > 0) {
-    console.log(values)
     HTTP.post(
       '/comments/' + review.value.id,
       {

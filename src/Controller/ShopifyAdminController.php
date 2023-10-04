@@ -136,11 +136,7 @@ class ShopifyAdminController extends AbstractController
         ): Response
     {
 
-        if ($_SERVER["APP_ENV"] == "dev") {
-            $shopName = "madok-co.myshopify.com";
-        } else if ($_SERVER["APP_ENV"] = "prod") {
-            $shopName = parse_url($_SERVER["HTTP_REFERER"], PHP_URL_HOST);
-        }
+        $shopName = $request->get('shop');
 
         $data = $data = json_decode($request->getContent(), true);
         $ids = [];

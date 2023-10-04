@@ -58,9 +58,11 @@ class ReviewRepository extends ServiceEntityRepository
         $q = $this->createQueryBuilder('r')
             ->leftJoin('r.product', 'p')
             ->andWhere('p.shop = :shop')
+            ->andWhere('r.isPublished = :isValidated')
             ->setParameter('shop', $shop)
             ->orderBy('r.id', 'DESC')
-            ->setMaxResults(10);
+            ->setMaxResults(10)
+            ->setParameter('isValidated', true);
         if ($shop->isIsABuyer()) {
             $q->setFirstResult($firstResult)
                 ->setMaxResults($pageSize);
