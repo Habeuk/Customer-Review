@@ -70,7 +70,8 @@ class ReviewController extends AbstractController
 
         $review = new Review();
 
-        $review->setTitle($data["title"] ?? '');
+        $review->setTitle($data["title"]);
+        $review->setName($data["name"]);
         $review->setDescription($data["description"]);
         $review->setNote((int) $data["note"]);
         $review->setLikes(0);
