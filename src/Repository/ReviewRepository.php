@@ -133,7 +133,9 @@ class ReviewRepository extends ServiceEntityRepository
         return $this->createQueryBuilder('r')
             ->select('count(r.id) as count')
             ->andWhere('r.product = :product')
+            ->andWhere('r.isValidated = :isValidated')
             ->setParameter('product', $product)
+            ->setParameter('isValidated', true)
             ->getQuery()
             ->getOneOrNullResult();
     }

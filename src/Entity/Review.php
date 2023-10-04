@@ -80,7 +80,7 @@ class Review
     
     #[ORM\ManyToOne(inversedBy: 'reviews')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(['review:read'])]
+    #[Groups(['review:read','shop:review:read'])]
     private ?Product $product = null;
 
     #[ORM\Column(options: ["default" => 0])]
