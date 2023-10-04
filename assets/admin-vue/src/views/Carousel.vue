@@ -67,6 +67,7 @@ import Sidebar from '../components/Sidebar.vue';
 
 onMounted(() => {
   getPublishedReviews();
+  shop.value = shopAttributes.getAttribute("data-shop");
 });
 
 const reviews = ref();
@@ -74,6 +75,7 @@ const loading = ref(true);
 const review = ref();
 const selectedReviews = ref([]);
 const toast = useToast();
+const shop = ref();
 
 const filters = ref({
   global: { value: null, matchMode: FilterMatchMode.CONTAINS },
@@ -97,12 +99,11 @@ function getPublishedReviews(event) {
     event.preventDefault();
   }
   loading.value = true;
-  HTTP.get('/shopify/admin/api/v1/reviews?published=1').then(res => {
+  axios.get('/shopify/admin/api/v1/reviews?published=1&shop=' + shop.value).then(res => {
     reviews.value = res.data
     loading.value = false;
     if (event) {
       updateActive(event);
-      console.log(review)
     }
   });
 

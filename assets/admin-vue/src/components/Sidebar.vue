@@ -47,7 +47,6 @@ const items = ref([
   {
     label: 'Media Carousel',
     icon: 'pi pi-images',
-    to: '/review-carousel'
   },
   {
     label: 'Media Grid',

@@ -44,7 +44,8 @@ class CarouselManager
     {
 
         $shop = $this->em->getRepository(Shop::class)->findOneBy(['name' => $shopName]);
-        $carousel = $shop->getCarousel();
+        if ($shop) {
+            $carousel = $shop->getCarousel();
         if ($carousel) {
             return $carousel->getReview()->toArray();
         }
@@ -53,5 +54,6 @@ class CarouselManager
         $this->em->persist($carousel);
         $this->em->flush();
         return null;
+        }
     }
 }
