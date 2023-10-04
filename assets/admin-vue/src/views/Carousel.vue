@@ -100,7 +100,7 @@ function getPublishedReviews(event) {
     event.preventDefault();
   }
   loading.value = true;
-  axios.get('/shopify/admin/api/v1/reviews?published=1&shop=' + shop.value).then(res => {
+  HTTP.get('/shopify/admin/api/v1/reviews?published=1&shop=' + shop.value).then(res => {
     reviews.value = res.data
     loading.value = false;
     if (event) {
@@ -111,7 +111,6 @@ function getPublishedReviews(event) {
 }
 
 function addToCarousel() {
-  console.log(selectedReviews.value)
   HTTP.post('/shopify/admin/api/v1/carousel', selectedReviews.value).then(res => {
     selectedReviews.value = '';
     toast.add({ severity: 'success', summary: 'Confirmed', detail: 'The reviews was successfuly added to the carousel', life: 3000 });
