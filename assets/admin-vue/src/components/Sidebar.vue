@@ -24,37 +24,9 @@ const items = ref([
     to: '/'
   },
   {
-    label: 'Reviews Widget',
-    icon: 'pi pi-image',
-    items: [
-      {
-        label: 'General',
-      },
-      {
-        label: 'Styling',
-      }
-    ]
-  },
-  {
-    label: 'Star rating',
-    icon: 'pi pi-star',
-  },
-  {
     label: 'Carousel',
     icon: 'pi pi-images',
     to: '/carousel'
-  },
-  {
-    label: 'Media Carousel',
-    icon: 'pi pi-images',
-  },
-  {
-    label: 'Media Grid',
-    icon: 'pi pi-images',
-  },
-  {
-    label: 'Review Badge',
-    icon: 'pi pi-tag',
   }
 ]);
 

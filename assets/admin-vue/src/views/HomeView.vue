@@ -160,7 +160,8 @@
           <div class="card-body">
             <h5 class="card-title mb-4">Reply to review</h5>
 
-            <Dropdown v-model="selectedProduct" :options="products" filter optionLabel="title"
+            <div class="">
+              <Dropdown v-model="selectedProduct" :options="products" filter optionLabel="title"
               placeholder="Select a Product" class="w-100" :loading="dropdownLoading">
               <template #value="slotProps">
                 <div v-if="slotProps.value" class="flex align-items-center">
@@ -176,10 +177,13 @@
                 </div>
               </template>
             </Dropdown>
+            <small class="p-error" id="dd-error">{{ productErrorMessage || '&nbsp;' }}</small>
+            </div>
             <div class="my-3">
               <span>Give a note</span>
               <div class="mx-2">
                 <Rating v-model="ratingNote" :cancel="false" />
+                <small class="p-error" id="dd-error">{{ ratingErrorMessage || '&nbsp;' }}</small>
               </div>
             </div>
             <div class="mb-2 d-flex justify-content-between">
@@ -211,7 +215,7 @@
             <small id="text-error" class="p-error">{{ errorMessage || '&nbsp;' }}</small>
           </div>
           <div class="card-footer bg-white d-flex justify-content-end mt-2 pt-4">
-            <Button label="Post reply" :type="'submit'" severity="help" />
+            <Button label="Post reply" :type="'submit'" :loading="formButtonLoading" severity="help" />
           </div>
         </form>
       </div>
@@ -259,8 +263,8 @@ const review = ref();
 const product = ref();
 const { handleSubmit, resetForm } = useForm();
 const { value, errorMessage } = useField('value', validateField);
-const ratingNote = ref();
-const selectedProduct = ref();
+const ratingNote = ref('');
+const selectedProduct = ref('');
 const userName = ref();
 const email = ref();
 const title = ref();
@@ -270,6 +274,9 @@ const modalVisible = ref(visible);
 const toast = useToast();
 const shop = ref();
 const selectedReviews = ref([]);
+const formButtonLoading = ref(false);
+const productErrorMessage = ref();
+const ratingErrorMessage = ref();
 
 const filters = ref({
   global: { value: null, matchMode: FilterMatchMode.CONTAINS },
@@ -415,11 +422,17 @@ function resetReviewForm() {
   email.value = '';
   title.value = '';
   reviewText.value = '';
-  products.value = '';
 }
 
 const submitReviewForm = handleSubmit((values) => {
-  HTTP.post(
+  if (selectedProduct.value === '') {
+    productErrorMessage.value = 'Please select the product';
+  } else if(ratingNote.value === '') {
+    ratingErrorMessage.value = 'Please give a note';
+  }
+   else {
+    formButtonLoading.value = true;
+    HTTP.post(
     '/shopify/admin/api/v1/reviews?shop=' + shop.value,
     {
       name: userName.value,
@@ -430,11 +443,14 @@ const submitReviewForm = handleSubmit((values) => {
       description: reviewText.value
     }
   ).then(() => {
+    formButtonLoading.value = false;
     addReviewVisible.value = false
     toast.add({ severity: 'info', summary: 'The review was added successfuly', detail: values.value, life: 3000 });
     resetReviewForm();
     getReviews();
   });
+  }
+  
 });
 
 
