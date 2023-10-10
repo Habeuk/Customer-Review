@@ -2,3 +2,10 @@
 @import '~bootstrap';
 @import "~primevue/resources/themes/bootstrap4-light-blue/theme.css";
 @import '~primeicons/primeicons.css';
+
+.router-link-active-exact {
+    background: #007bff;
+    span {
+        color: white;
+    }
+}

@@ -72,6 +72,13 @@ class ReviewManager
                             $this->em->persist($p);
                             $this->em->flush();
 
+                            if (!is_null($product->getReviewSummary)) {
+                                $summary = new ReviewSummary();
+                                $summary->setProduct($product);
+                                $this->em->persist($summary);
+                                $this->em->flush();
+                            }
+
                             $productCache->expiresAfter(600);
                             $this->cache->save($productCache->set($p));
                             return $p;
@@ -184,7 +191,7 @@ class ReviewManager
         $summary = $product->getReviewSummary();
         for ($i = 1; $i < 6; $i++) {
             $setNote = "setNote" . $i;
-            $count = $reviewRepository->countReviewByNoteAndProduct($i, $summary->getProduct());
+            $count = $reviewRepository->countReviewByNoteAndProduct($i, $product);
             $summary->$setNote($count["count"]);
             $total = $reviewRepository->countReviewsByProduct($summary->getProduct());
 
@@ -203,6 +210,10 @@ class ReviewManager
         $note += $summary->getNote3() * 3;
         $note += $summary->getNote4() * 4;
         $note += $summary->getNote5() * 5;
+
+        if ($total == 0 || $note == 0) {
+            return 0;
+        }
 
         $mean = $note / $total;
 

@@ -85,7 +85,6 @@ class ShopifyAdminController extends AbstractController
         ShopRepository $shopRepository,
         CacheInterface $cache,
     ): Response {
-
         $shopName = $request->get('shop');
 
         $review = new Review();
@@ -121,13 +120,6 @@ class ShopifyAdminController extends AbstractController
 
             $em->persist($review);
             $em->flush();
-            $reviewManager = new ReviewManager(
-                $em,
-                $serializer,
-                $cache
-            );
-
-            $reviewManager->updateSummary($review->getId());
 
             $jsonReviews = $serializer->serialize($review, 'json', ['groups' => 'review:read']);
             return new JsonResponse($jsonReviews, Response::HTTP_OK, ['accept' => 'json'], true);
@@ -138,11 +130,10 @@ class ShopifyAdminController extends AbstractController
 
     #[Route('/carousel', name: 'app_shop_carousel_add', methods: Request::METHOD_POST)]
     public function addToCarousel(
-        EntityManagerInterface $em, 
+        EntityManagerInterface $em,
         Request $request,
-        SerializerInterface $serializer, 
-        ): Response
-    {
+        SerializerInterface $serializer,
+    ): Response {
 
         $shopName = $request->get('shop');
 
@@ -159,6 +150,31 @@ class ShopifyAdminController extends AbstractController
         $carousel = $carouselManager->addReviews($shopName, $reviews);
 
         $jsonReviews = $serializer->serialize($reviews, 'json', ['groups' => 'review:read']);
+        return new JsonResponse($jsonReviews, Response::HTTP_OK, ['accept' => 'json'], true);
+    }
+
+    #[Route('/search', name: 'app_shop_search')]
+    public function search(ReviewRepository $reviewRepository, Request $request, SerializerInterface $serializer): Response
+    {
+        if ($request->get('q')) {
+            $reviews = $reviewRepository->search(
+                $request->get('shop'),
+                $request->get('q'),
+                $request->get('reviews')
+            );
+    
+            $jsonReviews = $serializer->serialize($reviews, 'json', ['groups' => 'shop:review:read']);
+    
+            return new JsonResponse($jsonReviews, Response::HTTP_OK, ['accept' => 'json'], true); 
+        }
+        $reviews = $reviewRepository->findByproductName(
+            $request->get('shop'),
+            $request->get('product'),
+            $request->get('reviews')
+        );
+
+        $jsonReviews = $serializer->serialize($reviews, 'json', ['groups' => 'shop:review:read']);
+
         return new JsonResponse($jsonReviews, Response::HTTP_OK, ['accept' => 'json'], true);
     }
 }

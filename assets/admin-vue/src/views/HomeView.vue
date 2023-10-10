@@ -25,9 +25,8 @@
                   </a>
 
                   <ul class="dropdown-menu">
-                    <li><a class="dropdown-item" href="#">Action</a></li>
-                    <li><a class="dropdown-item" href="#">Another action</a></li>
-                    <li><a class="dropdown-item" href="#">Something else here</a></li>
+                    <li><a class="dropdown-item" href="#">Publish all</a></li>
+                    <li><a class="dropdown-item" href="#">Unpublish all</a></li>
                   </ul>
                 </div>
               </div>
@@ -49,13 +48,14 @@
                     @click="addReview()" />
                 </div>
               </div>
-              <DataTable v-model:selection="selectedReviews" :value="reviews" tableStyle="min-width: 50rem"
+              <DataTable v-model:selection="selectedReviews" v-model:filters="filters" paginator :rows="10"
+                :rowsPerPageOptions="[5, 10, 20, 50]" :value="reviews" filterDisplay="row" tableStyle="min-width: 50rem"
                 :loading="loading">
                 <template #header>
                   <div class="flex justify-content-end">
                     <div class="p-input-icon-left">
                       <i class="pi pi-search" />
-                      <InputText v-model="filters['global'].value" placeholder="Search for reviews..." />
+                      <InputText v-model="filters['global'].value" @input="findReviews($event)" placeholder="Search for reviews..." />
                     </div>
                   </div>
                 </template>
@@ -63,6 +63,10 @@
                 <Column field="product" header="Product">
                   <template #body="slotProps">
                     <p>{{ slotProps.data.product.title }}</p>
+                  </template>
+                  <template #filter="{ filterModel, filterCallback }">
+                    <InputText v-model="filterModel.value" type="text" @input="productReviews($event)"
+                      class="p-column-filter" placeholder="Search by name" />
                   </template>
                 </Column>
                 <Column field="note" header="Reviews">
@@ -160,26 +164,30 @@
           <div class="card-body">
             <h5 class="card-title mb-4">Reply to review</h5>
 
-            <Dropdown v-model="selectedProduct" :options="products" filter optionLabel="title"
-              placeholder="Select a Product" class="w-100" :loading="dropdownLoading">
-              <template #value="slotProps">
-                <div v-if="slotProps.value" class="flex align-items-center">
-                  <div>{{ slotProps.value.title }}</div>
-                </div>
-                <span v-else>
-                  {{ slotProps.placeholder }}
-                </span>
-              </template>
-              <template #option="slotProps">
-                <div class="flex align-items-center">
-                  <div>{{ slotProps.option.title }}</div>
-                </div>
-              </template>
-            </Dropdown>
+            <div class="">
+              <Dropdown v-model="selectedProduct" :options="products" filter optionLabel="title"
+                placeholder="Select a Product" class="w-100" :loading="dropdownLoading">
+                <template #value="slotProps">
+                  <div v-if="slotProps.value" class="flex align-items-center">
+                    <div>{{ slotProps.value.title }}</div>
+                  </div>
+                  <span v-else>
+                    {{ slotProps.placeholder }}
+                  </span>
+                </template>
+                <template #option="slotProps">
+                  <div class="flex align-items-center">
+                    <div>{{ slotProps.option.title }}</div>
+                  </div>
+                </template>
+              </Dropdown>
+              <small class="p-error" id="dd-error">{{ productErrorMessage || '&nbsp;' }}</small>
+            </div>
             <div class="my-3">
               <span>Give a note</span>
               <div class="mx-2">
                 <Rating v-model="ratingNote" :cancel="false" />
+                <small class="p-error" id="dd-error">{{ ratingErrorMessage || '&nbsp;' }}</small>
               </div>
             </div>
             <div class="mb-2 d-flex justify-content-between">
@@ -211,7 +219,7 @@
             <small id="text-error" class="p-error">{{ errorMessage || '&nbsp;' }}</small>
           </div>
           <div class="card-footer bg-white d-flex justify-content-end mt-2 pt-4">
-            <Button label="Post reply" :type="'submit'" severity="help" />
+            <Button label="Post reply" :type="'submit'" :loading="formButtonLoading" severity="help" />
           </div>
         </form>
       </div>
@@ -247,6 +255,8 @@ onMounted(() => {
   shop.value = shopAttributes.getAttribute("data-shop");
   getReviews();
   getProducts();
+
+  activeTab.value = document.querySelector('.active');
 });
 
 const reviews = ref();
@@ -259,8 +269,8 @@ const review = ref();
 const product = ref();
 const { handleSubmit, resetForm } = useForm();
 const { value, errorMessage } = useField('value', validateField);
-const ratingNote = ref();
-const selectedProduct = ref();
+const ratingNote = ref('');
+const selectedProduct = ref('');
 const userName = ref();
 const email = ref();
 const title = ref();
@@ -270,10 +280,14 @@ const modalVisible = ref(visible);
 const toast = useToast();
 const shop = ref();
 const selectedReviews = ref([]);
+const formButtonLoading = ref(false);
+const productErrorMessage = ref();
+const ratingErrorMessage = ref();
+const activeTab = ref();
 
 const filters = ref({
   global: { value: null, matchMode: FilterMatchMode.CONTAINS },
-  'country.name': { value: null, matchMode: FilterMatchMode.STARTS_WITH },
+  product: { value: null, matchMode: FilterMatchMode.STARTS_WITH },
   representative: { value: null, matchMode: FilterMatchMode.IN },
   status: { value: null, matchMode: FilterMatchMode.EQUALS },
   verified: { value: null, matchMode: FilterMatchMode.EQUALS }
@@ -342,6 +356,7 @@ function updateActive(event) {
   event.target.classList.add("active");
   event.target.classList.remove("link-secondary");
   event.target.setAttribute("aria-current", "page");
+  activeTab.value = document.querySelector('.active');
 }
 
 const validate = (slotProps, value) => {
@@ -415,26 +430,48 @@ function resetReviewForm() {
   email.value = '';
   title.value = '';
   reviewText.value = '';
-  products.value = '';
 }
 
 const submitReviewForm = handleSubmit((values) => {
-  HTTP.post(
-    '/shopify/admin/api/v1/reviews?shop=' + shop.value,
-    {
-      name: userName.value,
-      email: email.value,
-      title: title.value,
-      note: ratingNote.value,
-      handle: selectedProduct.value.handle,
-      description: reviewText.value
-    }
-  ).then(() => {
-    addReviewVisible.value = false
-    toast.add({ severity: 'info', summary: 'The review was added successfuly', detail: values.value, life: 3000 });
-    resetReviewForm();
-    getReviews();
-  });
+  if (selectedProduct.value === '') {
+    productErrorMessage.value = 'Please select the product';
+  } else if (ratingNote.value === '') {
+    ratingErrorMessage.value = 'Please give a note';
+  }
+  else {
+    formButtonLoading.value = true;
+    HTTP.post(
+      '/shopify/admin/api/v1/reviews?shop=' + shop.value,
+      {
+        name: userName.value,
+        email: email.value,
+        title: title.value,
+        note: ratingNote.value,
+        handle: selectedProduct.value.handle,
+        description: reviewText.value
+      }
+    ).then(() => {
+      formButtonLoading.value = false;
+      addReviewVisible.value = false
+      ratingErrorMessage.value = '';
+      productErrorMessage.value = '';
+      toast.add({ severity: 'info', summary: 'The review was added successfuly', detail: values.value, life: 3000 });
+      resetReviewForm();
+      switch (activeTab.value.innerHTML) {
+        case 'All Reviews':
+          getReviews()
+          break;
+        case 'Unpublished':
+          getUnpublishedReviews();
+          break;
+        default:
+          getPublishedReviews();
+          break;
+      }
+      getReviews();
+    });
+  }
+
 });
 
 
@@ -446,5 +483,58 @@ function getProducts() {
   });
 }
 
+function productReviews(event) {
+  let q = event.target.value;
+  switch (activeTab.value.innerHTML) {
+    case 'All Reviews':
+      q += '&reviews=all';
+      break;
+    case 'Unpublished':
+      q += '&reviews=unpublished';
+      break;
+    default:
+      q += '&reviews=published';
+      break;
+  }
+  if (q.length >= 3) {
+    getReviewsByProduct(q);
+  }
+}
+
+function getReviewsByProduct(q) {
+  HTTP.get('/shopify/admin/api/v1/search?product=' + q + '&shop=' + shop.value).then(res => {
+    if (res.data.length > 0) {
+      reviews.value = res.data;
+    }
+  }).catch(function (error) {
+  });
+}
+
+function findReviews(event) {
+  let q = event.target.value;
+  switch (activeTab.value.innerHTML) {
+    case 'All Reviews':
+      q += '&reviews=all';
+      break;
+    case 'Unpublished':
+      q += '&reviews=unpublished';
+      break;
+    default:
+      q += '&reviews=published';
+      break;
+  }
+  if (q.length >= 3) {
+    getReviewsBySearchQuery(q);
+  }
+}
+
+function getReviewsBySearchQuery(q) {
+  HTTP.get('/shopify/admin/api/v1/search?q=' + q + '&shop=' + shop.value).then(res => {
+    if (res.data.length > 0) {
+      reviews.value = res.data;
+    }
+  }).catch(function (error) {
+  });
+}
 
 </script>
