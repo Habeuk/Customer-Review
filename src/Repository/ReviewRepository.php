@@ -92,8 +92,8 @@ class ReviewRepository extends ServiceEntityRepository
             ->orderBy('r.id', 'DESC')
             ->andWhere('p.shop = :shop')
             ->setParameter('shop', $shop)
-            ->setMaxResults(10);
-            
+            ->setMaxResults(100);
+
         if ($shop->isIsABuyer()) {
             $q->setFirstResult($firstResult)
                 ->setMaxResults($pageSize);
@@ -138,5 +138,72 @@ class ReviewRepository extends ServiceEntityRepository
             ->setParameter('isValidated', true)
             ->getQuery()
             ->getOneOrNullResult();
+    }
+
+    public function findByproductName($shop, $search = null, $type = null)
+    {
+        $q = $this->createQueryBuilder('r')
+            ->innerJoin('r.product', 'p')
+            ->innerJoin('p.shop', 's')
+            ->addSelect('p')
+            ->addSelect('s')
+            ->orderBy('r.id', 'DESC')
+            ->andWhere('s.name = :shop')
+            ->setParameter('shop', $shop);
+        if ($search && $search != "") {
+            $q->andWhere('p.title LIKE :searchTerm')
+                ->setParameter('searchTerm', '%' . $search . '%');
+        }
+
+        switch ($type) {
+            case 'published':
+                $q->andWhere('r.isValidated = :isValidated')
+                    ->setParameter('isValidated', true);
+                break;
+            case 'unpublished':
+                $q->andWhere('r.isValidated = :isValidated')
+                    ->setParameter('isValidated', false);
+                break;
+
+            default:
+
+                break;
+        }
+        return $q->getQuery()
+            ->getResult();
+    }
+
+    public function search($shop, $search = null, $type = null)
+    {
+        $q = $this->createQueryBuilder('r')
+            ->innerJoin('r.product', 'p')
+            ->innerJoin('p.shop', 's')
+            ->addSelect('p')
+            ->addSelect('s')
+            ->orderBy('r.id', 'DESC')
+            ->andWhere('s.name = :shop')
+            ->setParameter('shop', $shop);
+        if ($search && $search != "") {
+            $q->andWhere('r.title LIKE :searchTerm')
+            ->andWhere('r.description LIKE :searchTerm')
+                ->setParameter('searchTerm', '%' . $search . '%');
+        }
+
+        switch ($type) {
+            case 'published':
+                $q->andWhere('r.isValidated = :isValidated')
+                    ->setParameter('isValidated', true);
+                break;
+            case 'unpublished':
+                $q->andWhere('r.isValidated = :isValidated')
+                    ->setParameter('isValidated', false);
+                break;
+
+            default:
+
+                break;
+        }
+        return $q->getQuery()
+            ->getResult();
     }
 }

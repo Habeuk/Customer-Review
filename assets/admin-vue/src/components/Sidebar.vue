@@ -1,6 +1,6 @@
 <template>
   <div class="card flex justify-content-center">
-    <PanelMenu :model="items" class="w-100" />
+    <PanelMenu exact :model="items" class="w-100" />
   </div>
   <div class="mt-5">
     <Button v-if="visible" icon="pi pi-bolt" :loading="loading" label="Upgrade to premium" class="w-100" @click="upgrade()" />
@@ -24,37 +24,9 @@ const items = ref([
     to: '/'
   },
   {
-    label: 'Reviews Widget',
-    icon: 'pi pi-image',
-    items: [
-      {
-        label: 'General',
-      },
-      {
-        label: 'Styling',
-      }
-    ]
-  },
-  {
-    label: 'Star rating',
-    icon: 'pi pi-star',
-  },
-  {
     label: 'Carousel',
     icon: 'pi pi-images',
     to: '/carousel'
-  },
-  {
-    label: 'Media Carousel',
-    icon: 'pi pi-images',
-  },
-  {
-    label: 'Media Grid',
-    icon: 'pi pi-images',
-  },
-  {
-    label: 'Review Badge',
-    icon: 'pi pi-tag',
   }
 ]);
 
