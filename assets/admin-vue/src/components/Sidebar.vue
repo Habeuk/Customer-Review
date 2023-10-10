@@ -1,6 +1,6 @@
 <template>
   <div class="card flex justify-content-center">
-    <PanelMenu :model="items" class="w-100" />
+    <PanelMenu exact :model="items" class="w-100" />
   </div>
   <div class="mt-5">
     <Button v-if="visible" icon="pi pi-bolt" :loading="loading" label="Upgrade to premium" class="w-100" @click="upgrade()" />
